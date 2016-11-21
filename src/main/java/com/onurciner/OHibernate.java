@@ -27,7 +27,7 @@ import jsqlite.Stmt;
 
 /**
  * Created by Onur.Ciner on 7.11.2016.
- * VERSION 1.1.0
+ * VERSION 1.0.0
  */
 
 public class OHibernate<K> {
