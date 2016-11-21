@@ -27,17 +27,37 @@ import jsqlite.Stmt;
 
 /**
  * Created by Onur.Ciner on 7.11.2016.
- * VERSION 1.0.0
+ * VERSION 1.1.0
  */
 
 public class OHibernate<K> {
 
+    final private static char[] hexArray = "0123456789ABCDEF".toCharArray();
+    //----------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
+    private final int DEFAULT_SRID = 4326;
+    private final int SDK_SRID = 3857;
     private K classType;
+    private Transactions transactions = new Process();
+    private String tableName = "";
+    private ArrayList<String> fields = new ArrayList<>();
+    private ArrayList<String> fieldsValues = new ArrayList<>();
+    private ArrayList<String> fieldsType = new ArrayList<>();
+    private String id_fieldName = "";
+    private String id_fieldType = "";
+    private ArrayList<String> GeoColumnNames = new ArrayList<>();
+    private ArrayList<Integer> GeoColumnSRids = new ArrayList<>();
+    private ArrayList<GeometryColumn.GEO_TYPE> GeoColumnTypes = new ArrayList<>();
+    private boolean idPrimeryKey = false;
+    private Class<K> clazzOfT;
+    private Integer limit = null;
+    private OHibernate.ENUM_LIKE like = null;
+    private String where_key = null;
 
-    public OHibernate setObj(K classType) {
-        this.classType = classType;
-        return this;
-    }
+    //----------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------
+    private String where_value = null;
 
     public OHibernate(Class<K> kClass) {
         try {
@@ -53,22 +73,23 @@ public class OHibernate<K> {
         new OHibernateConfig().getConfig();
     }
 
-    private Transactions transactions = new Process();
+    private static String bytesToHex(byte[] bytes) {
+        if (bytes != null) {
+            char[] hexChars = new char[bytes.length * 2];
+            for (int j = 0; j < bytes.length; j++) {
+                int v = bytes[j] & 0xFF;
+                hexChars[j * 2] = hexArray[v >>> 4];
+                hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+            }
+            return new String(hexChars);
+        }
+        return "";
+    }
 
-    private String tableName = "";
-
-    private ArrayList<String> fields = new ArrayList<>();
-    private ArrayList<String> fieldsValues = new ArrayList<>();
-    private ArrayList<String> fieldsType = new ArrayList<>();
-
-    private String id_fieldName = "";
-    private String id_fieldType = "";
-
-    private ArrayList<String> GeoColumnNames = new ArrayList<>();
-    private ArrayList<Integer> GeoColumnSRids = new ArrayList<>();
-    private ArrayList<GeometryColumn.GEO_TYPE> GeoColumnTypes = new ArrayList<>();
-
-    private boolean idPrimeryKey = false;
+    public OHibernate setObj(K classType) {
+        this.classType = classType;
+        return this;
+    }
 
     private void engine(boolean idStatus, boolean idRemove) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
@@ -414,10 +435,6 @@ public class OHibernate<K> {
         return tableNames;
     }
 
-    //----------------------------------------------------------------------------------------------
-    //----------------------------------------------------------------------------------------------
-    //----------------------------------------------------------------------------------------------
-
     // INSERT İŞLEMİ
     public String insert(K obj) throws Exception {
         this.classType = obj;
@@ -621,7 +638,7 @@ public class OHibernate<K> {
                             } else if (field.getType().equals(boolean.class) || field.getType().equals(Boolean.class)) {
                                 field.set(source, Boolean.parseBoolean(stmt.column(i).toString()));
                             } else if (field.getType().equals(byte[].class) || field.getType().equals(Byte[].class)) {
-                                field.set(source,  (byte[])(stmt.column(i)));
+                                field.set(source, stmt.column(i));
                             } else
                                 field.set(source, stmt.column(i).toString());
                         }
@@ -704,7 +721,7 @@ public class OHibernate<K> {
                             } else if (field.getType().equals(boolean.class) || field.getType().equals(Boolean.class)) {
                                 field.set(source, Boolean.parseBoolean(stmt.column(i).toString()));
                             } else if (field.getType().equals(byte[].class) || field.getType().equals(Byte[].class)) {
-                                field.set(source,  (byte[])(stmt.column(i)));
+                                field.set(source, stmt.column(i));
                             } else
                                 field.set(source, stmt.column(i).toString());
                         }
@@ -793,7 +810,7 @@ public class OHibernate<K> {
                             } else if (field.getType().equals(boolean.class) || field.getType().equals(Boolean.class)) {
                                 field.set(source, Boolean.parseBoolean(stmt.column(i).toString()));
                             } else if (field.getType().equals(byte[].class) || field.getType().equals(Byte[].class)) {
-                                field.set(source,  (byte[])(stmt.column(i)));
+                                field.set(source, stmt.column(i));
                             } else
                                 field.set(source, stmt.column(i).toString());
                         }
@@ -906,7 +923,7 @@ public class OHibernate<K> {
                             } else if (field.getType().equals(boolean.class) || field.getType().equals(Boolean.class)) {
                                 field.set(source, Boolean.parseBoolean(stmt.column(i).toString()));
                             } else if (field.getType().equals(byte[].class) || field.getType().equals(Byte[].class)) {
-                                field.set(source,  (byte[])(stmt.column(i)));
+                                field.set(source, stmt.column(i));
                             } else
                                 field.set(source, stmt.column(i).toString());
                         }
@@ -931,11 +948,6 @@ public class OHibernate<K> {
         return sources;
     }
 
-    //----------------------------------------------------------------------------------------------
-    // ---------------------------------------------------------------------------------------------
-    private final int DEFAULT_SRID = 4326;
-    private final int SDK_SRID = 3857;
-
     private String getGeoType(Geometry geo) {
         if (geo instanceof Point)
             return "POINT";
@@ -946,8 +958,9 @@ public class OHibernate<K> {
         else
             return null;
     }
-
-    private Class<K> clazzOfT;
+    //----------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------
 
     private K getInstance() throws Exception {
         try {
@@ -1128,24 +1141,6 @@ public class OHibernate<K> {
         return tempFields;
     }
 
-    final private static char[] hexArray = "0123456789ABCDEF".toCharArray();
-
-    private static String bytesToHex(byte[] bytes) {
-        if (bytes != null) {
-            char[] hexChars = new char[bytes.length * 2];
-            for (int j = 0; j < bytes.length; j++) {
-                int v = bytes[j] & 0xFF;
-                hexChars[j * 2] = hexArray[v >>> 4];
-                hexChars[j * 2 + 1] = hexArray[v & 0x0F];
-            }
-            return new String(hexChars);
-        }
-        return "";
-    }
-    //----------------------------------------------------------------------------------------------
-    //----------------------------------------------------------------------------------------------
-    //----------------------------------------------------------------------------------------------
-
     private void restart() {
         this.limit = null;
         this.like = null;
@@ -1153,17 +1148,9 @@ public class OHibernate<K> {
         this.where_value = null;
     }
 
-    private Integer limit = null;
-
     public OHibernate limit(Integer limit) {
         this.limit = limit;
         return this;
-    }
-
-    private OHibernate.ENUM_LIKE like = null;
-
-    public enum ENUM_LIKE {
-        BASINA, SONUNA, HER_IKI_TARAFINA
     }
 
     public OHibernate like(OHibernate.ENUM_LIKE enum_like) {
@@ -1171,13 +1158,14 @@ public class OHibernate<K> {
         return this;
     }
 
-    private String where_key = null;
-    private String where_value = null;
-
     public OHibernate where(String key, String value) {
         this.where_key = key;
         this.where_value = value;
         return this;
+    }
+
+    public enum ENUM_LIKE {
+        BASINA, SONUNA, HER_IKI_TARAFINA
     }
 
     //----------------------------------------------------------------------------------------------
