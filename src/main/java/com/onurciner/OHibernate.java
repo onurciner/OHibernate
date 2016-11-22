@@ -15,6 +15,7 @@ import com.onurciner.ohibernate.Entity;
 import com.onurciner.ohibernate.GeometryColumn;
 import com.onurciner.ohibernate.Id;
 import com.onurciner.ohibernate.NonColumn;
+import com.onurciner.ohibernatetools.OHash;
 
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.Field;
@@ -27,7 +28,11 @@ import jsqlite.Stmt;
 
 /**
  * Created by Onur.Ciner on 7.11.2016.
- * VERSION 1.0.0
+ * VERSION 1.0.1
+ * ### LOG 1 - 22.11.2016 ###
+ * -Birden fazla where koşulu desteği geldi. Where koşullarını bağlamak için and ve or bağlaçları getirildi.
+ * -Like sistemi değişti. Where metodunun içerisine 3. parametre olarak like koşulu verilebilmektedir.
+ * -Select, Update ve Delete komutları için birden fazla where koşulu kullanılabilir.
  */
 
 public class OHibernate<K> {
@@ -60,6 +65,7 @@ public class OHibernate<K> {
     private ArrayList<String> fields = new ArrayList<>();
     private ArrayList<String> fieldsValues = new ArrayList<>();
     private ArrayList<String> fieldsType = new ArrayList<>();
+
 
     private String id_fieldName = "";
     private String id_fieldType = "";
@@ -305,7 +311,7 @@ public class OHibernate<K> {
 
         }
 
-        transactions.define(fieldsValues, fields, fieldsType, tableName, id_fieldName);
+        transactions.define(fieldsValues, fields, fieldsType, tableName, id_fieldName, whereData, andConnector, orConnector);
     }
 
     private void tableCreate() {
@@ -568,35 +574,49 @@ public class OHibernate<K> {
         }
         String keys = keye.substring(2, keye.length());
 
-        String key = "";
-        String value = "";
-
+        //----->
         String sql = "";
-
-        if (this.like != null) {
-
-            if (this.where_key != null) {
-                key = where_key;
-                value = where_value;
-
-                if (this.like == OHibernate.ENUM_LIKE.BASINA)
-                    sql = "SELECT " + keys + " FROM " + tableName + " WHERE " + key + " like '%" + value + "'";
-                if (this.like == OHibernate.ENUM_LIKE.SONUNA)
-                    sql = "SELECT " + keys + " FROM " + tableName + " WHERE " + key + " like '" + value + "%'";
-                if (this.like == OHibernate.ENUM_LIKE.HER_IKI_TARAFINA)
-                    sql = "SELECT " + keys + " FROM " + tableName + " WHERE " + key + " like '%" + value + "%'";
-
+        String connector = "";
+        if (andConnector > 0) {
+            connector = " and ";
+        } else if (orConnector > 0)
+            connector = " or ";
+        if (this.like != null && this.like.size() > 0) {
+            if (this.whereData != null && this.whereData.size() > 0) {
+                sql = "SELECT " + keys + " FROM " + tableName + " WHERE ";
+                for (int i = 0; i < whereData.size(); i++) {
+                    if (this.like.get(i) == OHibernate.ENUM_LIKE.BASINA)
+                        sql += whereData.getKey(i) + " like '%" + whereData.getValue(i) + "'" + connector;
+                    else if (this.like.get(i) == OHibernate.ENUM_LIKE.SONUNA)
+                        sql += whereData.getKey(i) + " like '" + whereData.getValue(i) + "%' " + connector;
+                    else if (this.like.get(i) == OHibernate.ENUM_LIKE.HER_IKI_TARAFINA)
+                        sql += whereData.getKey(i) + " like '%" + whereData.getValue(i) + "%' " + connector;
+                    else {
+                        sql += whereData.getKey(i) + "='" + whereData.getValue(i) + "' " + connector;
+                    }
+                }
+                if (andConnector > 0) {
+                    sql = sql.substring(0, sql.length() - 4);
+                } else if (orConnector > 0)
+                    sql = sql.substring(0, sql.length() - 3);
             } else {
                 sql = "SELECT " + keys + " FROM " + tableName + " ";
             }
         } else {
-            if (this.where_key != null) {
-                key = where_key;
-                value = where_value;
-                sql = "SELECT " + keys + " FROM " + tableName + " WHERE " + key + " = '" + value + "'";
-            } else
+            if (this.whereData != null && this.whereData.size() > 0) {
+                sql = "SELECT " + keys + " FROM " + tableName + " WHERE ";
+                for (int i = 0; i < whereData.size(); i++) {
+                    sql += whereData.getKey(i) + "='" + whereData.getValue(i) + "' " + connector;
+                }
+                if (andConnector > 0) {
+                    sql = sql.substring(0, sql.length() - 4);
+                } else if (orConnector > 0)
+                    sql = sql.substring(0, sql.length() - 3);
+            } else {
                 sql = "SELECT " + keys + " FROM " + tableName + " ";
+            }
         }
+        //-----> ##################################
 
         Stmt stmt = OHibernateConfig.db.prepare(sql);
         while (stmt.step()) {
@@ -644,7 +664,7 @@ public class OHibernate<K> {
         return null;
     }
 
-    public K select(String key, String value) throws Exception {
+    public K select(String key, Object value) throws Exception {
 
         try {
             engine(false, false);
@@ -664,21 +684,49 @@ public class OHibernate<K> {
         }
         String keys = keye.substring(2, keye.length());
 
-        if (this.where_key != null) {
-            key = where_key;
-            value = where_value;
-        }
-
+        //----->
         String sql = "";
-        if (this.like != null) {
-            if (this.like == OHibernate.ENUM_LIKE.BASINA)
-                sql = "SELECT " + keys + " FROM " + tableName + " WHERE " + key + " like '%" + value + "'";
-            if (this.like == OHibernate.ENUM_LIKE.SONUNA)
-                sql = "SELECT " + keys + " FROM " + tableName + " WHERE " + key + " like '" + value + "%'";
-            if (this.like == OHibernate.ENUM_LIKE.HER_IKI_TARAFINA)
-                sql = "SELECT " + keys + " FROM " + tableName + " WHERE " + key + " like '%" + value + "%'";
-        } else
-            sql = "SELECT " + keys + " FROM " + tableName + " WHERE " + key + " = '" + value + "'";
+        String connector = "";
+        if (andConnector > 0) {
+            connector = " and ";
+        } else if (orConnector > 0)
+            connector = " or ";
+        if (this.like != null && this.like.size() > 0) {
+            if (this.whereData != null && this.whereData.size() > 0) {
+                sql = "SELECT " + keys + " FROM " + tableName + " WHERE ";
+                for (int i = 0; i < whereData.size(); i++) {
+                    if (this.like.get(i) == OHibernate.ENUM_LIKE.BASINA)
+                        sql += whereData.getKey(i) + " like '%" + whereData.getValue(i) + "'" + connector;
+                    else if (this.like.get(i) == OHibernate.ENUM_LIKE.SONUNA)
+                        sql += whereData.getKey(i) + " like '" + whereData.getValue(i) + "%' " + connector;
+                    else if (this.like.get(i) == OHibernate.ENUM_LIKE.HER_IKI_TARAFINA)
+                        sql += whereData.getKey(i) + " like '%" + whereData.getValue(i) + "%' " + connector;
+                    else {
+                        sql += whereData.getKey(i) + "='" + whereData.getValue(i) + "' " + connector;
+                    }
+                }
+                if (andConnector > 0) {
+                    sql = sql.substring(0, sql.length() - 4);
+                } else if (orConnector > 0)
+                    sql = sql.substring(0, sql.length() - 3);
+            } else {
+                sql = "SELECT " + keys + " FROM " + tableName + " WHERE " + key + " = '" + value + "'";
+            }
+        } else {
+            if (this.whereData != null && this.whereData.size() > 0) {
+                sql = "SELECT " + keys + " FROM " + tableName + " WHERE ";
+                for (int i = 0; i < whereData.size(); i++) {
+                    sql += whereData.getKey(i) + "='" + whereData.getValue(i) + "' " + connector;
+                }
+                if (andConnector > 0) {
+                    sql = sql.substring(0, sql.length() - 4);
+                } else if (orConnector > 0)
+                    sql = sql.substring(0, sql.length() - 3);
+            } else {
+                sql = "SELECT " + keys + " FROM " + tableName + " WHERE " + key + " = '" + value + "'";
+            }
+        }
+        //-----> ##################################
 
 
         Stmt stmt = OHibernateConfig.db.prepare(sql);
@@ -728,7 +776,7 @@ public class OHibernate<K> {
     }
 
     // SELECTALL İŞLEMİ
-    public ArrayList<K> selectAll(String key, String value) throws Exception {
+    public ArrayList<K> selectAll(String key, Object value) throws Exception {
 
         try {
             engine(false, false);
@@ -748,27 +796,55 @@ public class OHibernate<K> {
         }
         String keys = keye.substring(2, keye.length());
 
-        if (this.where_key != null) {
-            key = where_key;
-            value = where_value;
+        //----->
+        String sql = "";
+        String connector = "";
+        if (andConnector > 0) {
+            connector = " and ";
+        } else if (orConnector > 0)
+            connector = " or ";
+        if (this.like != null && this.like.size() > 0) {
+            if (this.whereData != null && this.whereData.size() > 0) {
+                sql = "SELECT " + keys + " FROM " + tableName + " WHERE ";
+                for (int i = 0; i < whereData.size(); i++) {
+                    if (this.like.get(i) == OHibernate.ENUM_LIKE.BASINA)
+                        sql += whereData.getKey(i) + " like '%" + whereData.getValue(i) + "'" + connector;
+                    else if (this.like.get(i) == OHibernate.ENUM_LIKE.SONUNA)
+                        sql += whereData.getKey(i) + " like '" + whereData.getValue(i) + "%' " + connector;
+                    else if (this.like.get(i) == OHibernate.ENUM_LIKE.HER_IKI_TARAFINA)
+                        sql += whereData.getKey(i) + " like '%" + whereData.getValue(i) + "%' " + connector;
+                    else {
+                        sql += whereData.getKey(i) + "='" + whereData.getValue(i) + "' " + connector;
+                    }
+                }
+                if (andConnector > 0) {
+                    sql = sql.substring(0, sql.length() - 4);
+                } else if (orConnector > 0)
+                    sql = sql.substring(0, sql.length() - 3);
+            } else {
+                sql = "SELECT " + keys + " FROM " + tableName + " WHERE " + key + " = '" + value + "'";
+            }
+        } else {
+            if (this.whereData != null && this.whereData.size() > 0) {
+                sql = "SELECT " + keys + " FROM " + tableName + " WHERE ";
+                for (int i = 0; i < whereData.size(); i++) {
+                    sql += whereData.getKey(i) + "='" + whereData.getValue(i) + "' " + connector;
+                }
+                if (andConnector > 0) {
+                    sql = sql.substring(0, sql.length() - 4);
+                } else if (orConnector > 0)
+                    sql = sql.substring(0, sql.length() - 3);
+            } else {
+                sql = "SELECT " + keys + " FROM " + tableName + " WHERE " + key + " = '" + value + "'";
+            }
         }
+        //-----> ##################################
 
-        String sql = "SELECT " + keys + " FROM " + tableName + " WHERE " + key + "='" + value + "'";
 
-        if (this.like != null) {
-            if (this.like == OHibernate.ENUM_LIKE.BASINA)
-                sql = "SELECT " + keys + " FROM " + tableName + " WHERE " + key + " like '%" + value + "'";
-            if (this.like == OHibernate.ENUM_LIKE.SONUNA)
-                sql = "SELECT " + keys + " FROM " + tableName + " WHERE " + key + " like '" + value + "%'";
-            if (this.like == OHibernate.ENUM_LIKE.HER_IKI_TARAFINA)
-                sql = "SELECT " + keys + " FROM " + tableName + " WHERE " + key + " like '%" + value + "%'";
-        }
         if (this.limit != null)
             sql += " LIMIT " + this.limit + "";
 
-
         ArrayList<K> sources = new ArrayList<K>();
-
 
         Stmt stmt = OHibernateConfig.db.prepare(sql);
         while (stmt.step()) {
@@ -848,34 +924,48 @@ public class OHibernate<K> {
         String keys = keye.substring(2, keye.length());
 
 
-        String key = "";
-        String value = "";
         String sql = "";
 
+        String connector = "";
+        if (andConnector > 0) {
+            connector = " and ";
+        } else if (orConnector > 0)
+            connector = " or ";
 
-        if (this.like != null) {
-
-            if (this.where_key != null) {
-                key = where_key;
-                value = where_value;
-
-                if (this.like == OHibernate.ENUM_LIKE.BASINA)
-                    sql = "SELECT " + keys + " FROM " + tableName + " WHERE " + key + " like '%" + value + "'";
-                if (this.like == OHibernate.ENUM_LIKE.SONUNA)
-                    sql = "SELECT " + keys + " FROM " + tableName + " WHERE " + key + " like '" + value + "%'";
-                if (this.like == OHibernate.ENUM_LIKE.HER_IKI_TARAFINA)
-                    sql = "SELECT " + keys + " FROM " + tableName + " WHERE " + key + " like '%" + value + "%'";
-
+        if (this.like != null && this.like.size() > 0) {
+            if (this.whereData != null && this.whereData.size() > 0) {
+                sql = "SELECT " + keys + " FROM " + tableName + " WHERE ";
+                for (int i = 0; i < whereData.size(); i++) {
+                    if (this.like.get(i) == OHibernate.ENUM_LIKE.BASINA)
+                        sql += whereData.getKey(i) + " like '%" + whereData.getValue(i) + "'" + connector;
+                    else if (this.like.get(i) == OHibernate.ENUM_LIKE.SONUNA)
+                        sql += whereData.getKey(i) + " like '" + whereData.getValue(i) + "%' " + connector;
+                    else if (this.like.get(i) == OHibernate.ENUM_LIKE.HER_IKI_TARAFINA)
+                        sql += whereData.getKey(i) + " like '%" + whereData.getValue(i) + "%' " + connector;
+                    else {
+                        sql += whereData.getKey(i) + "='" + whereData.getValue(i) + "' " + connector;
+                    }
+                }
+                if (andConnector > 0) {
+                    sql = sql.substring(0, sql.length() - 4);
+                } else if (orConnector > 0)
+                    sql = sql.substring(0, sql.length() - 3);
             } else {
                 sql = "SELECT " + keys + " FROM " + tableName + " ";
             }
         } else {
-            if (this.where_key != null) {
-                key = where_key;
-                value = where_value;
-                sql = "SELECT " + keys + " FROM " + tableName + " WHERE " + key + " = '" + value + "'";
-            } else
+            if (this.whereData != null && this.whereData.size() > 0) {
+                sql = "SELECT " + keys + " FROM " + tableName + " WHERE ";
+                for (int i = 0; i < whereData.size(); i++) {
+                    sql += whereData.getKey(i) + "='" + whereData.getValue(i) + "' " + connector;
+                }
+                if (andConnector > 0) {
+                    sql = sql.substring(0, sql.length() - 4);
+                } else if (orConnector > 0)
+                    sql = sql.substring(0, sql.length() - 3);
+            } else {
                 sql = "SELECT " + keys + " FROM " + tableName + " ";
+            }
         }
 
         if (this.limit != null)
@@ -1149,8 +1239,10 @@ public class OHibernate<K> {
     private void restart() {
         this.limit = null;
         this.like = null;
-        this.where_key = null;
-        this.where_value = null;
+
+        this.whereData = null;
+        this.andConnector = 0;
+        this.orConnector = 0;
     }
 
     private Integer limit = null;
@@ -1160,27 +1252,52 @@ public class OHibernate<K> {
         return this;
     }
 
-    private OHibernate.ENUM_LIKE like = null;
+    private ArrayList<OHibernate.ENUM_LIKE> like = new ArrayList<>();
 
     public enum ENUM_LIKE {
         BASINA, SONUNA, HER_IKI_TARAFINA
     }
 
-    public OHibernate like(OHibernate.ENUM_LIKE enum_like) {
-        this.like = enum_like;
+    private OHash<String, Object> whereData = new OHash<>();
+
+    public OHibernate where(String key, Object value) {
+        whereData.add(key, value);
+
+        this.like.add(null);
+
         return this;
     }
 
-    private String where_key = null;
-    private String where_value = null;
+    public OHibernate where(String key, Object value, OHibernate.ENUM_LIKE like) {
+        whereData.add(key, value);
 
-    public OHibernate where(String key, String value) {
-        this.where_key = key;
-        this.where_value = value;
+        this.like.add(like);
+
         return this;
     }
 
+    private Integer andConnector = 0;
+
+    public OHibernate and() {
+        andConnector++;
+        return this;
+    }
+
+    private Integer orConnector = 0;
+
+    public OHibernate or() {
+        orConnector++;
+        return this;
+    }
+
+
+    /*  NOTLAR
     //----------------------------------------------------------------------------------------------
+        Parametreli select ve selectAll metotlarında eğer where metodu ve parametreler aynı anda verilirse
+      where koşulları kabul edilir ve parametreleri görmezden gelir. Aynı zamanda parametrili select ve selectAll
+      metotlarına 'like' eklenemez.
+        Update ve delete işlemlerinde birden fazla where koşulları kullanılabilir.
+
     //----------------------------------------------------------------------------------------------
-    //----------------------------------------------------------------------------------------------
+    */
 }

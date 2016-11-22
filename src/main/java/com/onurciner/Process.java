@@ -2,6 +2,8 @@ package com.onurciner;
 
 import android.util.Log;
 
+import com.onurciner.ohibernatetools.OHash;
+
 import java.util.ArrayList;
 
 import jsqlite.Exception;
@@ -18,13 +20,21 @@ public class Process implements Transactions {
     private ArrayList<String> fields;
     private ArrayList<String> fieldsValues;
     private ArrayList<String> fieldsTypes;
+
+    private OHash<String, Object> whereData;
+    private Integer andConnector;
+    private Integer orConnector;
+
     @Override
-    public void define(ArrayList<String> fieldsValues,ArrayList<String> fields, ArrayList<String> fieldsTypes, String tableName, String id_fieldName){
+    public void define(ArrayList<String> fieldsValues, ArrayList<String> fields, ArrayList<String> fieldsTypes, String tableName, String id_fieldName, OHash<String, Object> whereData, Integer andConnector, Integer orConnector) {
         this.fieldsValues = fieldsValues;
         this.fields = fields;
         this.tableName = tableName;
         this.id_fieldName = id_fieldName;
         this.fieldsTypes = fieldsTypes;
+        this.whereData = whereData;
+        this.andConnector = andConnector;
+        this.orConnector = orConnector;
     }
 
     @Override
@@ -83,7 +93,31 @@ public class Process implements Transactions {
         }
         String keys = key.substring(2, key.length());
 
-        String sql = "UPDATE " + tableName + " SET " + keys + " WHERE " + id_fieldName + " = '" + id + "'";
+        String sql = null;
+
+        //-------->>Where
+        if (whereData != null && whereData.size() > 0) {
+            if(andConnector != null && andConnector>0){
+                String wherer = "";
+                for(int i = 0; i<whereData.getKeysArrayList().size();i++){
+                    wherer += " "+ whereData.getKeysArrayList().get(i) +"='"+whereData.getValuesArrayList().get(i)+"' and";
+                }
+                wherer = wherer.substring(0,wherer.length()-3);
+                sql = "UPDATE " + tableName + " SET " + keys + " WHERE"+wherer+" ";
+            }else if(orConnector != null && orConnector>0){
+                String wherer = "";
+                for(int i = 0; i<whereData.getKeysArrayList().size();i++){
+                    wherer += " "+ whereData.getKeysArrayList().get(i) +"='"+whereData.getValuesArrayList().get(i)+"' or";
+                }
+                wherer = wherer.substring(0,wherer.length()-2);
+                sql = "UPDATE " + tableName + " SET " + keys + " WHERE"+wherer+" ";
+            }else{
+                sql = "UPDATE " + tableName + " SET " + keys + " WHERE " + whereData.getKey(0) + " = '" + whereData.getValue(0) + "'";
+            }
+        } else {
+            sql = "UPDATE " + tableName + " SET " + keys + " WHERE " + id_fieldName + " = '" + id + "'";
+        }
+        //-------->>Where #############
 
         OHibernateConfig.db.exec(sql, null);
 
@@ -122,6 +156,30 @@ public class Process implements Transactions {
         }
 
         String sql = "DELETE FROM " + tableName + " WHERE " + id_fieldName + "='" + id + "'";
+
+        //-------->>Where
+        if (whereData != null && whereData.size() > 0) {
+            if(andConnector != null && andConnector>0){
+                String wherer = "";
+                for(int i = 0; i<whereData.getKeysArrayList().size();i++){
+                    wherer += " "+ whereData.getKeysArrayList().get(i) +"='"+whereData.getValuesArrayList().get(i)+"' and";
+                }
+                wherer = wherer.substring(0,wherer.length()-3);
+                sql = "DELETE FROM "+ tableName +" WHERE" +wherer+" ";
+            }else if(orConnector != null && orConnector>0){
+                String wherer = "";
+                for(int i = 0; i<whereData.getKeysArrayList().size();i++){
+                    wherer += " "+ whereData.getKeysArrayList().get(i) +"='"+whereData.getValuesArrayList().get(i)+"' or";
+                }
+                wherer = wherer.substring(0,wherer.length()-2);
+                sql = "DELETE FROM "+ tableName +" WHERE" +wherer+" ";
+            }else{
+                sql = "DELETE FROM "+ tableName +" WHERE " + whereData.getKey(0) + " = '" + whereData.getValue(0) + "'";
+            }
+        } else {
+            sql = "DELETE FROM " + tableName + " WHERE " + id_fieldName + "='" + id + "'";
+        }
+        //-------->>Where #############
 
         OHibernateConfig.db.exec(sql, null);
 
