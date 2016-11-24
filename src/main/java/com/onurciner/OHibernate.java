@@ -591,11 +591,11 @@ public class OHibernate<K> {
             if (this.whereData != null && this.whereData.size() > 0) {
                 sql += " " + keys + " FROM " + tableName + " WHERE ";
                 for (int i = 0; i < whereData.size(); i++) {
-                    if (this.like.get(i) == LIKE_TYPE.BASINA)
+                    if (this.like.get(i) == LIKE_TYPE.FRONT)
                         sql += whereData.getKey(i) + " like '%" + whereData.getValue(i) + "'" + connector;
-                    else if (this.like.get(i) == LIKE_TYPE.SONUNA)
+                    else if (this.like.get(i) == LIKE_TYPE.BEHIND)
                         sql += whereData.getKey(i) + " like '" + whereData.getValue(i) + "%' " + connector;
-                    else if (this.like.get(i) == LIKE_TYPE.HER_IKI_TARAFINA)
+                    else if (this.like.get(i) == LIKE_TYPE.BOTH)
                         sql += whereData.getKey(i) + " like '%" + whereData.getValue(i) + "%' " + connector;
                     else {
                         sql += whereData.getKey(i) + "='" + whereData.getValue(i) + "' " + connector;
@@ -707,11 +707,11 @@ public class OHibernate<K> {
             if (this.whereData != null && this.whereData.size() > 0) {
                 sql += " " + keys + " FROM " + tableName + " WHERE ";
                 for (int i = 0; i < whereData.size(); i++) {
-                    if (this.like.get(i) == LIKE_TYPE.BASINA)
+                    if (this.like.get(i) == LIKE_TYPE.FRONT)
                         sql += whereData.getKey(i) + " like '%" + whereData.getValue(i) + "'" + connector;
-                    else if (this.like.get(i) == LIKE_TYPE.SONUNA)
+                    else if (this.like.get(i) == LIKE_TYPE.BEHIND)
                         sql += whereData.getKey(i) + " like '" + whereData.getValue(i) + "%' " + connector;
-                    else if (this.like.get(i) == LIKE_TYPE.HER_IKI_TARAFINA)
+                    else if (this.like.get(i) == LIKE_TYPE.BOTH)
                         sql += whereData.getKey(i) + " like '%" + whereData.getValue(i) + "%' " + connector;
                     else {
                         sql += whereData.getKey(i) + "='" + whereData.getValue(i) + "' " + connector;
@@ -824,11 +824,11 @@ public class OHibernate<K> {
             if (this.whereData != null && this.whereData.size() > 0) {
                 sql += " " + keys + " FROM " + tableName + " WHERE ";
                 for (int i = 0; i < whereData.size(); i++) {
-                    if (this.like.get(i) == LIKE_TYPE.BASINA)
+                    if (this.like.get(i) == LIKE_TYPE.FRONT)
                         sql += whereData.getKey(i) + " like '%" + whereData.getValue(i) + "'" + connector;
-                    else if (this.like.get(i) == LIKE_TYPE.SONUNA)
+                    else if (this.like.get(i) == LIKE_TYPE.BEHIND)
                         sql += whereData.getKey(i) + " like '" + whereData.getValue(i) + "%' " + connector;
-                    else if (this.like.get(i) == LIKE_TYPE.HER_IKI_TARAFINA)
+                    else if (this.like.get(i) == LIKE_TYPE.BOTH)
                         sql += whereData.getKey(i) + " like '%" + whereData.getValue(i) + "%' " + connector;
                     else {
                         sql += whereData.getKey(i) + "='" + whereData.getValue(i) + "' " + connector;
@@ -959,11 +959,11 @@ public class OHibernate<K> {
             if (this.whereData != null && this.whereData.size() > 0) {
                 sql += " " + keys + " FROM " + tableName + " WHERE ";
                 for (int i = 0; i < whereData.size(); i++) {
-                    if (this.like.get(i) == LIKE_TYPE.BASINA)
+                    if (this.like.get(i) == LIKE_TYPE.FRONT)
                         sql += whereData.getKey(i) + " like '%" + whereData.getValue(i) + "'" + connector;
-                    else if (this.like.get(i) == LIKE_TYPE.SONUNA)
+                    else if (this.like.get(i) == LIKE_TYPE.BEHIND)
                         sql += whereData.getKey(i) + " like '" + whereData.getValue(i) + "%' " + connector;
-                    else if (this.like.get(i) == LIKE_TYPE.HER_IKI_TARAFINA)
+                    else if (this.like.get(i) == LIKE_TYPE.BOTH)
                         sql += whereData.getKey(i) + " like '%" + whereData.getValue(i) + "%' " + connector;
                     else {
                         sql += whereData.getKey(i) + "='" + whereData.getValue(i) + "' " + connector;
@@ -1281,7 +1281,7 @@ public class OHibernate<K> {
 
     private ArrayList<LIKE_TYPE> like = new ArrayList<>();
     public enum LIKE_TYPE {
-        BASINA, SONUNA, HER_IKI_TARAFINA
+        FRONT, BEHIND, BOTH
     }
 
     private OHash<String, Object> whereData = new OHash<>();
