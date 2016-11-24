@@ -9,6 +9,8 @@ import com.nutiteq.geometry.Polygon;
 import com.nutiteq.utils.Utils;
 import com.nutiteq.utils.WkbRead;
 import com.nutiteq.utils.WktWriter;
+import com.onurciner.enums.LIKE_TYPE;
+import com.onurciner.enums.ORDER_BY_TYPE;
 import com.onurciner.ohibernate.Blob;
 import com.onurciner.ohibernate.Column;
 import com.onurciner.ohibernate.Entity;
@@ -1280,10 +1282,6 @@ public class OHibernate<K> {
     }
 
     private ArrayList<LIKE_TYPE> like = new ArrayList<>();
-    public enum LIKE_TYPE {
-        FRONT, BEHIND, BOTH
-    }
-
     private OHash<String, Object> whereData = new OHash<>();
     public OHibernate where(String key, Object value) {
         whereData.add(key, value);
@@ -1315,9 +1313,6 @@ public class OHibernate<K> {
         return this;
     }
 
-    public enum ORDER_BY_TYPE{
-        ASC,DESC
-    }
 
     private OHash<String,ORDER_BY_TYPE> orderbyData = new OHash<>();
     public OHibernate orderby(String key, ORDER_BY_TYPE order_by_type){
