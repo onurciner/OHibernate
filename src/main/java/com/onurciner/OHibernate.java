@@ -446,11 +446,12 @@ public class OHibernate<K> {
     }
 
     /**
-     * idStatus eğer true olursa otomatik olarak id ataması yapar. Default şeklide bu şekildedir. Eğer false ise o zaman id'ye dokunmaz.
-     *
-     * @param obj
-     * @param idStatus
-     * @return
+     * idStatus eğer true olursa otomatik olarak id ataması yapar. Default şeklide bu(true) şekildedir. Eğer false ise o zaman id'ye dokunmaz.
+     * yani ID'yi normal bir kolon olarak düşünür.
+     * Eğer idStatus değerini false olarak belirlersek objenin id'sini elle set etmiş olmamız gerekir aksi taktirde id değerine null değeri atanır.
+     * @param obj insert edilecek obje.
+     * @param idStatus false ise insert edilecek objenin id'sini custom olarak biz belirleriz.
+     * @return id değeri dönderir.
      * @throws Exception
      */
     public String insert(K obj, boolean idStatus) throws Exception {
