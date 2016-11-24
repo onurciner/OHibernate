@@ -35,5 +35,12 @@ public class OHibernateConfig {
         return config;
     }
 
+    public static OHibernateConfig setDatabase(Database database){
+        if(config == null){
+            config = new OHibernateConfig();
+            db = database;
+        }
+        return config;
+    }
 
 }

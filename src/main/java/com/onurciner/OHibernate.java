@@ -575,7 +575,9 @@ public class OHibernate<K> {
         String keys = keye.substring(2, keye.length());
 
         //----->
-        String sql = "";
+        String sql = "SELECT";
+        if(distinct)
+            sql += " DISTINCT";
         String connector = "";
         if (andConnector > 0) {
             connector = " and ";
@@ -583,13 +585,13 @@ public class OHibernate<K> {
             connector = " or ";
         if (this.like != null && this.like.size() > 0) {
             if (this.whereData != null && this.whereData.size() > 0) {
-                sql = "SELECT " + keys + " FROM " + tableName + " WHERE ";
+                sql += " " + keys + " FROM " + tableName + " WHERE ";
                 for (int i = 0; i < whereData.size(); i++) {
-                    if (this.like.get(i) == OHibernate.ENUM_LIKE.BASINA)
+                    if (this.like.get(i) == LIKE_TYPE.BASINA)
                         sql += whereData.getKey(i) + " like '%" + whereData.getValue(i) + "'" + connector;
-                    else if (this.like.get(i) == OHibernate.ENUM_LIKE.SONUNA)
+                    else if (this.like.get(i) == LIKE_TYPE.SONUNA)
                         sql += whereData.getKey(i) + " like '" + whereData.getValue(i) + "%' " + connector;
-                    else if (this.like.get(i) == OHibernate.ENUM_LIKE.HER_IKI_TARAFINA)
+                    else if (this.like.get(i) == LIKE_TYPE.HER_IKI_TARAFINA)
                         sql += whereData.getKey(i) + " like '%" + whereData.getValue(i) + "%' " + connector;
                     else {
                         sql += whereData.getKey(i) + "='" + whereData.getValue(i) + "' " + connector;
@@ -600,11 +602,11 @@ public class OHibernate<K> {
                 } else if (orConnector > 0)
                     sql = sql.substring(0, sql.length() - 3);
             } else {
-                sql = "SELECT " + keys + " FROM " + tableName + " ";
+                sql += " " + keys + " FROM " + tableName + " ";
             }
         } else {
             if (this.whereData != null && this.whereData.size() > 0) {
-                sql = "SELECT " + keys + " FROM " + tableName + " WHERE ";
+                sql += " " + keys + " FROM " + tableName + " WHERE ";
                 for (int i = 0; i < whereData.size(); i++) {
                     sql += whereData.getKey(i) + "='" + whereData.getValue(i) + "' " + connector;
                 }
@@ -613,10 +615,14 @@ public class OHibernate<K> {
                 } else if (orConnector > 0)
                     sql = sql.substring(0, sql.length() - 3);
             } else {
-                sql = "SELECT " + keys + " FROM " + tableName + " ";
+                sql += " " + keys + " FROM " + tableName + " ";
             }
         }
         //-----> ##################################
+
+        if(this.orderbyData != null && this.orderbyData.size()>0){
+            sql += " ORDER BY "+this.orderbyData.getKey(0) + " "+this.orderbyData.getValue(0)+ "";
+        }
 
         Stmt stmt = OHibernateConfig.db.prepare(sql);
         while (stmt.step()) {
@@ -685,7 +691,9 @@ public class OHibernate<K> {
         String keys = keye.substring(2, keye.length());
 
         //----->
-        String sql = "";
+        String sql = "SELECT";
+        if(distinct)
+            sql += " DISTINCT";
         String connector = "";
         if (andConnector > 0) {
             connector = " and ";
@@ -693,13 +701,13 @@ public class OHibernate<K> {
             connector = " or ";
         if (this.like != null && this.like.size() > 0) {
             if (this.whereData != null && this.whereData.size() > 0) {
-                sql = "SELECT " + keys + " FROM " + tableName + " WHERE ";
+                sql += " " + keys + " FROM " + tableName + " WHERE ";
                 for (int i = 0; i < whereData.size(); i++) {
-                    if (this.like.get(i) == OHibernate.ENUM_LIKE.BASINA)
+                    if (this.like.get(i) == LIKE_TYPE.BASINA)
                         sql += whereData.getKey(i) + " like '%" + whereData.getValue(i) + "'" + connector;
-                    else if (this.like.get(i) == OHibernate.ENUM_LIKE.SONUNA)
+                    else if (this.like.get(i) == LIKE_TYPE.SONUNA)
                         sql += whereData.getKey(i) + " like '" + whereData.getValue(i) + "%' " + connector;
-                    else if (this.like.get(i) == OHibernate.ENUM_LIKE.HER_IKI_TARAFINA)
+                    else if (this.like.get(i) == LIKE_TYPE.HER_IKI_TARAFINA)
                         sql += whereData.getKey(i) + " like '%" + whereData.getValue(i) + "%' " + connector;
                     else {
                         sql += whereData.getKey(i) + "='" + whereData.getValue(i) + "' " + connector;
@@ -710,11 +718,11 @@ public class OHibernate<K> {
                 } else if (orConnector > 0)
                     sql = sql.substring(0, sql.length() - 3);
             } else {
-                sql = "SELECT " + keys + " FROM " + tableName + " WHERE " + key + " = '" + value + "'";
+                sql += " " + keys + " FROM " + tableName + " WHERE " + key + " = '" + value + "'";
             }
         } else {
             if (this.whereData != null && this.whereData.size() > 0) {
-                sql = "SELECT " + keys + " FROM " + tableName + " WHERE ";
+                sql += " " + keys + " FROM " + tableName + " WHERE ";
                 for (int i = 0; i < whereData.size(); i++) {
                     sql += whereData.getKey(i) + "='" + whereData.getValue(i) + "' " + connector;
                 }
@@ -723,11 +731,14 @@ public class OHibernate<K> {
                 } else if (orConnector > 0)
                     sql = sql.substring(0, sql.length() - 3);
             } else {
-                sql = "SELECT " + keys + " FROM " + tableName + " WHERE " + key + " = '" + value + "'";
+                sql += " " + keys + " FROM " + tableName + " WHERE " + key + " = '" + value + "'";
             }
         }
         //-----> ##################################
 
+        if(this.orderbyData != null && this.orderbyData.size()>0){
+            sql += " ORDER BY "+this.orderbyData.getKey(0) + " "+this.orderbyData.getValue(0)+ "";
+        }
 
         Stmt stmt = OHibernateConfig.db.prepare(sql);
         while (stmt.step()) {
@@ -797,7 +808,9 @@ public class OHibernate<K> {
         String keys = keye.substring(2, keye.length());
 
         //----->
-        String sql = "";
+        String sql = "SELECT";
+        if(distinct)
+            sql += " DISTINCT";
         String connector = "";
         if (andConnector > 0) {
             connector = " and ";
@@ -805,13 +818,13 @@ public class OHibernate<K> {
             connector = " or ";
         if (this.like != null && this.like.size() > 0) {
             if (this.whereData != null && this.whereData.size() > 0) {
-                sql = "SELECT " + keys + " FROM " + tableName + " WHERE ";
+                sql += " " + keys + " FROM " + tableName + " WHERE ";
                 for (int i = 0; i < whereData.size(); i++) {
-                    if (this.like.get(i) == OHibernate.ENUM_LIKE.BASINA)
+                    if (this.like.get(i) == LIKE_TYPE.BASINA)
                         sql += whereData.getKey(i) + " like '%" + whereData.getValue(i) + "'" + connector;
-                    else if (this.like.get(i) == OHibernate.ENUM_LIKE.SONUNA)
+                    else if (this.like.get(i) == LIKE_TYPE.SONUNA)
                         sql += whereData.getKey(i) + " like '" + whereData.getValue(i) + "%' " + connector;
-                    else if (this.like.get(i) == OHibernate.ENUM_LIKE.HER_IKI_TARAFINA)
+                    else if (this.like.get(i) == LIKE_TYPE.HER_IKI_TARAFINA)
                         sql += whereData.getKey(i) + " like '%" + whereData.getValue(i) + "%' " + connector;
                     else {
                         sql += whereData.getKey(i) + "='" + whereData.getValue(i) + "' " + connector;
@@ -822,11 +835,11 @@ public class OHibernate<K> {
                 } else if (orConnector > 0)
                     sql = sql.substring(0, sql.length() - 3);
             } else {
-                sql = "SELECT " + keys + " FROM " + tableName + " WHERE " + key + " = '" + value + "'";
+                sql += " " + keys + " FROM " + tableName + " WHERE " + key + " = '" + value + "'";
             }
         } else {
             if (this.whereData != null && this.whereData.size() > 0) {
-                sql = "SELECT " + keys + " FROM " + tableName + " WHERE ";
+                sql += " " + keys + " FROM " + tableName + " WHERE ";
                 for (int i = 0; i < whereData.size(); i++) {
                     sql += whereData.getKey(i) + "='" + whereData.getValue(i) + "' " + connector;
                 }
@@ -835,11 +848,14 @@ public class OHibernate<K> {
                 } else if (orConnector > 0)
                     sql = sql.substring(0, sql.length() - 3);
             } else {
-                sql = "SELECT " + keys + " FROM " + tableName + " WHERE " + key + " = '" + value + "'";
+                sql += " " + keys + " FROM " + tableName + " WHERE " + key + " = '" + value + "'";
             }
         }
         //-----> ##################################
 
+        if(this.orderbyData != null && this.orderbyData.size()>0){
+            sql += " ORDER BY "+this.orderbyData.getKey(0) + " "+this.orderbyData.getValue(0)+ "";
+        }
 
         if (this.limit != null)
             sql += " LIMIT " + this.limit + "";
@@ -924,7 +940,10 @@ public class OHibernate<K> {
         String keys = keye.substring(2, keye.length());
 
 
-        String sql = "";
+        String sql = "SELECT";
+
+        if(distinct)
+            sql += " DISTINCT";
 
         String connector = "";
         if (andConnector > 0) {
@@ -934,13 +953,13 @@ public class OHibernate<K> {
 
         if (this.like != null && this.like.size() > 0) {
             if (this.whereData != null && this.whereData.size() > 0) {
-                sql = "SELECT " + keys + " FROM " + tableName + " WHERE ";
+                sql += " " + keys + " FROM " + tableName + " WHERE ";
                 for (int i = 0; i < whereData.size(); i++) {
-                    if (this.like.get(i) == OHibernate.ENUM_LIKE.BASINA)
+                    if (this.like.get(i) == LIKE_TYPE.BASINA)
                         sql += whereData.getKey(i) + " like '%" + whereData.getValue(i) + "'" + connector;
-                    else if (this.like.get(i) == OHibernate.ENUM_LIKE.SONUNA)
+                    else if (this.like.get(i) == LIKE_TYPE.SONUNA)
                         sql += whereData.getKey(i) + " like '" + whereData.getValue(i) + "%' " + connector;
-                    else if (this.like.get(i) == OHibernate.ENUM_LIKE.HER_IKI_TARAFINA)
+                    else if (this.like.get(i) == LIKE_TYPE.HER_IKI_TARAFINA)
                         sql += whereData.getKey(i) + " like '%" + whereData.getValue(i) + "%' " + connector;
                     else {
                         sql += whereData.getKey(i) + "='" + whereData.getValue(i) + "' " + connector;
@@ -951,11 +970,11 @@ public class OHibernate<K> {
                 } else if (orConnector > 0)
                     sql = sql.substring(0, sql.length() - 3);
             } else {
-                sql = "SELECT " + keys + " FROM " + tableName + " ";
+                sql += " " + keys + " FROM " + tableName + " ";
             }
         } else {
             if (this.whereData != null && this.whereData.size() > 0) {
-                sql = "SELECT " + keys + " FROM " + tableName + " WHERE ";
+                sql += " " + keys + " FROM " + tableName + " WHERE ";
                 for (int i = 0; i < whereData.size(); i++) {
                     sql += whereData.getKey(i) + "='" + whereData.getValue(i) + "' " + connector;
                 }
@@ -964,8 +983,12 @@ public class OHibernate<K> {
                 } else if (orConnector > 0)
                     sql = sql.substring(0, sql.length() - 3);
             } else {
-                sql = "SELECT " + keys + " FROM " + tableName + " ";
+                sql += " " + keys + " FROM " + tableName + " ";
             }
+        }
+
+        if(this.orderbyData != null && this.orderbyData.size()>0){
+            sql += " ORDER BY "+this.orderbyData.getKey(0) + " "+this.orderbyData.getValue(0)+ "";
         }
 
         if (this.limit != null)
@@ -1239,58 +1262,64 @@ public class OHibernate<K> {
     private void restart() {
         this.limit = null;
         this.like = null;
-
-        this.whereData = null;
+        this.whereData = new OHash<>();
         this.andConnector = 0;
         this.orConnector = 0;
+        this.distinct = false;
+        this.orderbyData = new OHash<>();
     }
 
     private Integer limit = null;
-
     public OHibernate limit(Integer limit) {
         this.limit = limit;
         return this;
     }
 
-    private ArrayList<OHibernate.ENUM_LIKE> like = new ArrayList<>();
-
-    public enum ENUM_LIKE {
+    private ArrayList<LIKE_TYPE> like = new ArrayList<>();
+    public enum LIKE_TYPE {
         BASINA, SONUNA, HER_IKI_TARAFINA
     }
 
     private OHash<String, Object> whereData = new OHash<>();
-
     public OHibernate where(String key, Object value) {
         whereData.add(key, value);
-
         this.like.add(null);
-
         return this;
     }
 
-    public OHibernate where(String key, Object value, OHibernate.ENUM_LIKE like) {
+    public OHibernate where(String key, Object value, LIKE_TYPE like) {
         whereData.add(key, value);
-
         this.like.add(like);
-
         return this;
     }
 
     private Integer andConnector = 0;
-
     public OHibernate and() {
         andConnector++;
         return this;
     }
 
     private Integer orConnector = 0;
-
     public OHibernate or() {
         orConnector++;
         return this;
     }
 
+    private boolean distinct = false;
+    public OHibernate distinct(){
+        distinct = true;
+        return this;
+    }
 
+    public enum ORDER_BY_TYPE{
+        ASC,DESC
+    }
+
+    private OHash<String,ORDER_BY_TYPE> orderbyData = new OHash<>();
+    public OHibernate orderby(String key, ORDER_BY_TYPE order_by_type){
+        orderbyData.add(key,order_by_type);
+        return this;
+    }
     /*  NOTLAR
     //----------------------------------------------------------------------------------------------
         Parametreli select ve selectAll metotlarında eğer where metodu ve parametreler aynı anda verilirse
