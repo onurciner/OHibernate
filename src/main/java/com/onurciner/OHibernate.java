@@ -33,6 +33,8 @@ import jsqlite.Stmt;
  * -Birden fazla where koşulu desteği geldi. Where koşullarını bağlamak için and ve or bağlaçları getirildi.
  * -Like sistemi değişti. Where metodunun içerisine 3. parametre olarak like koşulu verilebilmektedir.
  * -Select, Update ve Delete komutları için birden fazla where koşulu kullanılabilir.
+ * -Distinct özelliği eklendi.
+ * -OrderBy özelliği eklendi.
  */
 
 public class OHibernate<K> {
