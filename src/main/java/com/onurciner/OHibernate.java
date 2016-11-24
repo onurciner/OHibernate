@@ -470,6 +470,7 @@ public class OHibernate<K> {
         String id = transactions.insert();
 
         return id;
+
     }
 
     // UPDATE İŞLEMİ
