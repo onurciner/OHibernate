@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-
+group='com.github.10uroi'
 android {
     compileSdkVersion 23
     buildToolsVersion "24.0.2"
