@@ -33,7 +33,7 @@ public @interface Id {
      * @return default olarak false.
      * id sürekli pozitif olarak artım gösterir. ID'nin negatif veya değişkenlik gösterebilmesi için AUTO_ID kullanınız.
      */
-    boolean PRIMERY_KEY_AUTOINCREMENT() default false;
+    boolean PRIMARY_KEY_AUTOINCREMENT() default false;
 
     boolean UNIQUE() default false;
 }

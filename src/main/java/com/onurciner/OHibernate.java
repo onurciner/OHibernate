@@ -105,7 +105,7 @@ public class OHibernate<K> {
                     }
                     //----
 
-                    if (test.PRIMERY_KEY_AUTOINCREMENT())
+                    if (test.PRIMARY_KEY_AUTOINCREMENT())
                         idPrimeryKey = true;
                 }
             }
