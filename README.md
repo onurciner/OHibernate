@@ -40,7 +40,7 @@ and:
 		public class ExampleBean {
 
 			@Id(PRIMERY_KEY_AUTOINCREMENT = true)
-			private Long id;
+			private Integer id;
 
 			private String name;
 
