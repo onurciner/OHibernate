@@ -21,4 +21,7 @@ public @interface Column {
     Otomatik olarak db tablosundaki ilgili kolona datetime atar. True yapılması gerekir.
      */
     boolean DATETIME() default false;
+
+
+    boolean UNIQUE() default false;
 }

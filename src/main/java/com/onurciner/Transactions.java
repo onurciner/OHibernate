@@ -18,10 +18,10 @@ public interface Transactions {
 
     public void update() throws Exception;
 
-    public void update(String key, String value) throws Exception;
+    public void update(String key, Object value) throws Exception;
 
     public void delete() throws Exception;
 
-    public void delete(String key, String value) throws Exception;
+    public void delete(String key, Object value) throws Exception;
 }
 

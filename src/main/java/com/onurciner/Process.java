@@ -124,7 +124,7 @@ public class Process implements Transactions {
     }
 
     @Override
-    public void update(String key, String value) throws Exception {
+    public void update(String key, Object value) throws Exception {
 
         String keye = "";
 
@@ -132,7 +132,7 @@ public class Process implements Transactions {
             if (fieldsValues.get(i).contains("Transform(GeometryFromText"))
                 keye += ", " + fields.get(i) + "=" + fieldsValues.get(i) + " ";
             else if (fieldsTypes.get(i).equals("BLOB"))
-                key += ", " + fields.get(i) + "= X'" + fieldsValues.get(i) + "'";
+                keye += ", " + fields.get(i) + "= X'" + fieldsValues.get(i) + "'";
             else
                 keye += ", " + fields.get(i) + "='" + fieldsValues.get(i) + "'";
         }
@@ -186,7 +186,7 @@ public class Process implements Transactions {
     }
 
     @Override
-    public void delete(String key, String value) throws Exception {
+    public void delete(String key, Object value) throws Exception {
 
         String sql = "DELETE FROM " + tableName + " WHERE " + key + "='" + value + "'";
 

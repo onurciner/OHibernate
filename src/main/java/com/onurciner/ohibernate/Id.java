@@ -34,4 +34,6 @@ public @interface Id {
      * id sürekli pozitif olarak artım gösterir. ID'nin negatif veya değişkenlik gösterebilmesi için AUTO_ID kullanınız.
      */
     boolean PRIMERY_KEY_AUTOINCREMENT() default false;
+
+    boolean UNIQUE() default false;
 }

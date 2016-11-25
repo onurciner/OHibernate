@@ -37,6 +37,7 @@ import jsqlite.Stmt;
  * -Select, Update ve Delete komutları için birden fazla where koşulu kullanılabilir.
  * -Distinct özelliği eklendi.
  * -OrderBy özelliği eklendi.
+ * -Persist özelliği eklendi.
  */
 
 public class OHibernate<K> {
@@ -69,7 +70,7 @@ public class OHibernate<K> {
     private ArrayList<String> fields = new ArrayList<>();
     private ArrayList<String> fieldsValues = new ArrayList<>();
     private ArrayList<String> fieldsType = new ArrayList<>();
-
+    private ArrayList<String> fieldsUnique = new ArrayList<>();
 
     private String id_fieldName = "";
     private String id_fieldType = "";
@@ -243,6 +244,16 @@ public class OHibernate<K> {
 
                 }
 
+                if (field.isAnnotationPresent(Id.class)) {
+                    Id test = field.getAnnotation(Id.class);
+                    if (test.UNIQUE())
+                        fieldsUnique.add(field.getName());
+                }
+                if (field.isAnnotationPresent(Column.class)) {
+                    Column test = field.getAnnotation(Column.class);
+                    if (test.UNIQUE())
+                        fieldsUnique.add(field.getName());
+                }
 
                 if (field.isAnnotationPresent(NonColumn.class)) {
                     if (field.getName().equals(fields.get(fields.size() - 1))) {
@@ -342,16 +353,23 @@ public class OHibernate<K> {
             String keys = "";
 
             if (idPrimeryKey)
-                if (id_fieldType.equals("Integer") || id_fieldType.equals("int"))
-                    keys += id_fieldName + " INTEGER PRIMARY KEY AUTOINCREMENT, ";
-
+                if (id_fieldType.equals("Integer") || id_fieldType.equals("int")) {
+                    keys += id_fieldName + " INTEGER PRIMARY KEY AUTOINCREMENT";
+                    if (fieldsUnique.contains(id_fieldName))
+                        keys += " UNIQUE";
+                    keys += ", ";
+                }
             for (int i = 0; i < fields.size(); i++) {
                 String type = "";
                 if (fieldsType.get(i).equals("String") || fieldsType.get(i).equals("string")) {
                     type = "VARCHAR(255)";
+                    if (fieldsUnique.contains(fields.get(i)))
+                        type += " UNIQUE";
                     keys += fields.get(i) + " " + type + ", ";
                 } else if (fieldsType.get(i).equals("Integer") || fieldsType.get(i).equals("int")) {
                     type = "INTEGER";
+                    if (fieldsUnique.contains(fields.get(i)))
+                        type += " UNIQUE ";
                     keys += fields.get(i) + " " + type + ", ";
                 } else if (fieldsType.get(i).equals("Geometry") || fieldsType.get(i).equals("GEOMETRY")
                         || fieldsType.get(i).equals("Point") || fieldsType.get(i).equals("POINT")
@@ -360,7 +378,10 @@ public class OHibernate<K> {
 
                 } else {
                     type = fieldsType.get(i).toUpperCase();
-                    keys += fields.get(i) + " " + type + ", ";
+                    keys += fields.get(i) + " " + type + " ";
+                    if (fieldsUnique.contains(fields.get(i)))
+                        keys += "UNIQUE";
+                    keys += ", ";
                 }
 
             }
@@ -371,8 +392,10 @@ public class OHibernate<K> {
 
             try {
                 OHibernateConfig.db.exec(create, null);
+                Log.i("OHibernate -> Info", "Table Created");
             } catch (Exception e) {
                 e.printStackTrace();
+                Log.e("OHibernate -> Error", "Table not created : " + e.getMessage());
             }
 
             createGeometryColumns();
@@ -386,8 +409,10 @@ public class OHibernate<K> {
 
                 try {
                     OHibernateConfig.db.exec(create, null);
+                    Log.i("OHibernate -> Info", "Geometry Column Created");
                 } catch (Exception e) {
                     e.printStackTrace();
+                    Log.e("OHibernate -> Error", "Geometry column not created : " + e.getMessage());
                 }
             }
         }
@@ -398,8 +423,10 @@ public class OHibernate<K> {
 
         try {
             OHibernateConfig.db.exec(drop, null);
+            Log.i("OHibernate -> Info", "Table deleted");
         } catch (Exception e) {
             e.printStackTrace();
+            Log.e("OHibernate -> Error", "Table could not be deleted : " + e.getMessage());
         }
     }
 
@@ -420,6 +447,7 @@ public class OHibernate<K> {
 
         } catch (Exception e) {
             e.printStackTrace();
+            Log.e("OHibernate -> Error", e.getMessage());
         }
         return tableNames;
     }
@@ -451,7 +479,8 @@ public class OHibernate<K> {
      * idStatus eğer true olursa otomatik olarak id ataması yapar. Default şeklide bu(true) şekildedir. Eğer false ise o zaman id'ye dokunmaz.
      * yani ID'yi normal bir kolon olarak düşünür.
      * Eğer idStatus değerini false olarak belirlersek objenin id'sini elle set etmiş olmamız gerekir aksi taktirde id değerine null değeri atanır.
-     * @param obj insert edilecek obje.
+     *
+     * @param obj      insert edilecek obje.
      * @param idStatus false ise insert edilecek objenin id'sini custom olarak biz belirleriz.
      * @return id değeri dönderir.
      * @throws Exception
@@ -508,7 +537,7 @@ public class OHibernate<K> {
         transactions.update();
     }
 
-    public void update(K obj, String key, String value) throws Exception {
+    public void update(K obj, String key, Object value) throws Exception {
         classType = obj;
 
         try {
@@ -543,7 +572,7 @@ public class OHibernate<K> {
 
     }
 
-    public void delete(K obj, String key, String value) throws Exception {
+    public void delete(K obj, String key, Object value) throws Exception {
         classType = obj;
 
         try {
@@ -557,6 +586,93 @@ public class OHibernate<K> {
         }
 
         transactions.delete(key, value);
+    }
+
+    //PERSIST - Obje varsa update et yoksa insert et.
+    public String persist(K obj) throws Exception {
+        classType = obj;
+
+        try {
+            engine(false, false);
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+            Log.e("OHibernate -> Error", e.getMessage());
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            Log.e("OHibernate -> Error", e.getMessage());
+        }
+
+        String id = null;
+        if (id_fieldName != null) {
+            for (int i = 0; i < fields.size(); i++) {
+                if (fields.get(i).equals(id_fieldName)) {
+                    if (fieldsValues.get(i) == null || fieldsValues.get(i).equals("")) {
+                        id = insert(obj);
+                        Log.i("OHibernate -> Info", "Object successfully inserted");
+                        break;
+                    } else {
+                        if (select(id_fieldName, fieldsValues.get(i)) == null) {
+                            id = insert(obj);
+                            Log.i("OHibernate -> Info", "Object successfully inserted");
+                            break;
+                        } else {
+                            update(obj);
+                            id = fieldsValues.get(i);
+                            Log.i("OHibernate -> Info", "Object successfully updated");
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return id;
+    }
+
+    public String persist(K obj, String key, Object value) throws Exception {
+        classType = obj;
+
+        try {
+            engine(false, false);
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+            Log.e("OHibernate -> Error", e.getMessage());
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            Log.e("OHibernate -> Error", e.getMessage());
+        }
+
+        String id = null;
+        if (value != null) {
+            for (int i = 0; i < fields.size(); i++) {
+                if (fields.get(i).equals(key)) {
+                    if (fieldsValues.get(i) == null || fieldsValues.get(i).equals("")) {
+                        id = insert(obj);
+                        Log.i("OHibernate -> Info", "Object successfully inserted");
+                        break;
+                    } else {
+                        if (select(key, value) == null) {
+                            id = insert(obj);
+                            Log.i("OHibernate -> Info", "Object successfully inserted");
+                            break;
+                        } else {
+                            update(obj, key, value);
+                            if (id_fieldName != null) {
+                                for (int w = 0; w < fields.size(); w++) {
+                                    if (fields.get(w).equals(id_fieldName)) {
+                                        if (fieldsValues.get(w) != null || !fieldsValues.get(w).equals("")) {
+                                            id = fieldsValues.get(w);
+                                        }
+                                    }
+                                }
+                            }
+                            Log.i("OHibernate -> Info", "Object successfully updated");
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return id;
     }
 
     // SELECT İŞLEMİ
@@ -582,7 +698,7 @@ public class OHibernate<K> {
 
         //----->
         String sql = "SELECT";
-        if(distinct)
+        if (distinct)
             sql += " DISTINCT";
         String connector = "";
         if (andConnector > 0) {
@@ -626,8 +742,8 @@ public class OHibernate<K> {
         }
         //-----> ##################################
 
-        if(this.orderbyData != null && this.orderbyData.size()>0){
-            sql += " ORDER BY "+this.orderbyData.getKey(0) + " "+this.orderbyData.getValue(0)+ "";
+        if (this.orderbyData != null && this.orderbyData.size() > 0) {
+            sql += " ORDER BY " + this.orderbyData.getKey(0) + " " + this.orderbyData.getValue(0) + "";
         }
 
         Stmt stmt = OHibernateConfig.db.prepare(sql);
@@ -698,7 +814,7 @@ public class OHibernate<K> {
 
         //----->
         String sql = "SELECT";
-        if(distinct)
+        if (distinct)
             sql += " DISTINCT";
         String connector = "";
         if (andConnector > 0) {
@@ -742,8 +858,8 @@ public class OHibernate<K> {
         }
         //-----> ##################################
 
-        if(this.orderbyData != null && this.orderbyData.size()>0){
-            sql += " ORDER BY "+this.orderbyData.getKey(0) + " "+this.orderbyData.getValue(0)+ "";
+        if (this.orderbyData != null && this.orderbyData.size() > 0) {
+            sql += " ORDER BY " + this.orderbyData.getKey(0) + " " + this.orderbyData.getValue(0) + "";
         }
 
         Stmt stmt = OHibernateConfig.db.prepare(sql);
@@ -815,7 +931,7 @@ public class OHibernate<K> {
 
         //----->
         String sql = "SELECT";
-        if(distinct)
+        if (distinct)
             sql += " DISTINCT";
         String connector = "";
         if (andConnector > 0) {
@@ -859,8 +975,8 @@ public class OHibernate<K> {
         }
         //-----> ##################################
 
-        if(this.orderbyData != null && this.orderbyData.size()>0){
-            sql += " ORDER BY "+this.orderbyData.getKey(0) + " "+this.orderbyData.getValue(0)+ "";
+        if (this.orderbyData != null && this.orderbyData.size() > 0) {
+            sql += " ORDER BY " + this.orderbyData.getKey(0) + " " + this.orderbyData.getValue(0) + "";
         }
 
         if (this.limit != null)
@@ -948,7 +1064,7 @@ public class OHibernate<K> {
 
         String sql = "SELECT";
 
-        if(distinct)
+        if (distinct)
             sql += " DISTINCT";
 
         String connector = "";
@@ -993,8 +1109,8 @@ public class OHibernate<K> {
             }
         }
 
-        if(this.orderbyData != null && this.orderbyData.size()>0){
-            sql += " ORDER BY "+this.orderbyData.getKey(0) + " "+this.orderbyData.getValue(0)+ "";
+        if (this.orderbyData != null && this.orderbyData.size() > 0) {
+            sql += " ORDER BY " + this.orderbyData.getKey(0) + " " + this.orderbyData.getValue(0) + "";
         }
 
         if (this.limit != null)
@@ -1276,6 +1392,7 @@ public class OHibernate<K> {
     }
 
     private Integer limit = null;
+
     public OHibernate limit(Integer limit) {
         this.limit = limit;
         return this;
@@ -1283,6 +1400,7 @@ public class OHibernate<K> {
 
     private ArrayList<LIKE_TYPE> like = new ArrayList<>();
     private OHash<String, Object> whereData = new OHash<>();
+
     public OHibernate where(String key, Object value) {
         whereData.add(key, value);
         this.like.add(null);
@@ -1296,27 +1414,31 @@ public class OHibernate<K> {
     }
 
     private Integer andConnector = 0;
+
     public OHibernate and() {
         andConnector++;
         return this;
     }
 
     private Integer orConnector = 0;
+
     public OHibernate or() {
         orConnector++;
         return this;
     }
 
     private boolean distinct = false;
-    public OHibernate distinct(){
+
+    public OHibernate distinct() {
         distinct = true;
         return this;
     }
 
 
-    private OHash<String,ORDER_BY_TYPE> orderbyData = new OHash<>();
-    public OHibernate orderby(String key, ORDER_BY_TYPE order_by_type){
-        orderbyData.add(key,order_by_type);
+    private OHash<String, ORDER_BY_TYPE> orderbyData = new OHash<>();
+
+    public OHibernate orderBy(String key, ORDER_BY_TYPE order_by_type) {
+        orderbyData.add(key, order_by_type);
         return this;
     }
     /*  NOTLAR
