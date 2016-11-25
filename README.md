@@ -39,7 +39,7 @@ and:
         @Entity(TABLE_NAME = "example", TABLE_OPERATION = Entity.TABLE_OPERATION_TYPE.DROP_AND_CREATE)
 		public class ExampleBean {
 
-			@Id(PRIMERY_KEY_AUTOINCREMENT = true)
+			@Id(PRIMARY_KEY_AUTOINCREMENT = true)
 			private Integer id;
 
 			private String name;
