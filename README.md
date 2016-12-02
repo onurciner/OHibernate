@@ -1,5 +1,5 @@
 # OHibernate
-1.0.3
+1.0.4
 
 SQLite Connection for Android. ORM tool for Android devices.
 First ORM with Geometric-Spatial data support for Android operating systems.
