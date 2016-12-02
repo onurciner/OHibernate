@@ -43,7 +43,7 @@ import jsqlite.Stmt;
  * -Distinct özelliği eklendi.
  * -OrderBy özelliği eklendi.
  * -Persist özelliği eklendi.
- * ### LOG 1 - 01.12.2016 ###
+ * ### LOG 2 - 01.12.2016 ###
  * -OneToOne, OneToMany yapıları tam olarak tamamlandı.
  * -ManyToMany yapısı sadece insert işlemleri için çalışmaktadır.
  * -Fetch ve Cascade yapıları tamamlandı. Fetch yapındaki Lazy mantığı bilindik lazy yapısı ile çalışmamaktadır. Buradaki lazy yapısında hiç veri gelmez. Ekstra sorgu atmak gerekmektedir.
