@@ -1,8 +1,10 @@
 # OHibernate
-1.0.2
+1.0.3
 
 SQLite Connection for Android. ORM tool for Android devices.
 First ORM with Geometric-Spatial data support for Android operating systems.
+
+There is relational table support. OneToOne and OneToMany are fully supported.
 
 ##Installation
 
@@ -131,3 +133,140 @@ and:
 				return null;
 			}
 		}
+
+
+## Relational tables
+### Example OneToMany
+<table style="width:100%; border-collapse: collapse;" >
+  <tr>
+    <th>User</th>
+    <th>Address</th>
+  </tr>
+  <tr style="background: none">
+    <td style="padding:0; margin:0; border:none; width:50%;">
+      <pre lang="java"><code class="language-java">@Entity(TABLE_NAME = "users", TABLE_OPERATION = Entity.TABLE_OPERATION_TYPE.CREATE)
+	public class User {
+
+	  @Id(PRIMARY_KEY_AUTOINCREMENT = true)
+	  private Integer id;
+
+	  private String firstName;
+
+	  private String lastName;
+
+	  @OneToMany(JoinColumn = "user_id", Cascade = CascadeType.ALL, Fetch = FetchType.EAGER)
+	  private ArrayList<Address> addresses;
+
+	  ...
+	  //Getter - Setter
+	}
+       </code>
+     </pre>
+    </td>
+    <td style="padding:0; margin:0; border:none; width:50%;">
+      <pre lang="java"><code class="language-java">@Entity(TABLE_NAME = "addresses",TABLE_OPERATION = Entity.TABLE_OPERATION_TYPE.CREATE)
+	public class Address {
+
+	  @Id(PRIMARY_KEY_AUTOINCREMENT = true)
+	  private Integer id;
+
+	  private String county;
+
+	  @Column(NAME="phone_number")
+	  private Long phoneNumber;
+
+	  private Integer user_id;
+
+	  ...
+	  //Getter - Setter
+	}
+      </code></pre>
+    </td>
+  </tr>
+</table>
+
+<table style="width:100%; border-collapse: collapse;" >
+  <tr>
+    <th colspan="3">users</th>
+    <th colspan="1"></th>
+    <th colspan="4">addresses</th>
+  </tr>
+  <tr style="background: none">
+    <td style="padding:0; margin:0; border:none;">
+      id
+    </td>
+    <td style="padding:0; margin:0; border:none;">
+      firstname
+    </td>
+     <td style="padding:0; margin:0; border:none;">
+      lastname
+    </td>
+    <td style="padding:0; margin:0; border:none;">
+     
+    </td>
+    <td style="padding:0; margin:0; border:none;">
+      id
+    </td>
+    <td style="padding:0; margin:0; border:none;">
+      county
+    </td>
+    <td style="padding:0; margin:0; border:none;">
+      phone_number
+    </td>
+    <td style="padding:0; margin:0; border:none;">
+      user_id
+    </td>
+  </tr>
+  <tr style="background: none">
+    <td style="padding:0; margin:0; border:none;">
+      1
+    </td>
+    <td style="padding:0; margin:0; border:none;">
+      Onur
+    </td>
+     <td style="padding:0; margin:0; border:none;">
+      Ciner
+    </td>
+    <td style="padding:0; margin:0; border:none;">
+     ┬►
+    </td>
+    <td style="padding:0; margin:0; border:none;">
+      1
+    </td>
+    <td style="padding:0; margin:0; border:none;">
+      Ankara
+    </td>
+    <td style="padding:0; margin:0; border:none;">
+      05554443322
+    </td>
+    <td style="padding:0; margin:0; border:none;">
+      1
+    </td>
+  </tr>
+   <tr style="background: none">
+    <td style="padding:0; margin:0; border:none;">
+     
+    </td>
+    <td style="padding:0; margin:0; border:none;">
+     
+    </td>
+     <td style="padding:0; margin:0; border:none;">
+    
+    </td>
+    <td style="padding:0; margin:0; border:none;">
+     └►
+    </td>
+    <td style="padding:0; margin:0; border:none;">
+      2
+    </td>
+    <td style="padding:0; margin:0; border:none;">
+      İstanbul
+    </td>
+    <td style="padding:0; margin:0; border:none;">
+      05554443311
+    </td>
+    <td style="padding:0; margin:0; border:none;">
+      1
+    </td>
+  </tr>
+</table>
