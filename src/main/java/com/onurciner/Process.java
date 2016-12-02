@@ -2,7 +2,7 @@ package com.onurciner;
 
 import android.util.Log;
 
-import com.onurciner.ohibernatetools.OHash;
+import com.onurciner.ohibernatetools.Conditions;
 
 import java.util.ArrayList;
 
@@ -20,21 +20,16 @@ public class Process implements Transactions {
     private ArrayList<String> fields;
     private ArrayList<String> fieldsValues;
     private ArrayList<String> fieldsTypes;
-
-    private OHash<String, Object> whereData;
-    private Integer andConnector;
-    private Integer orConnector;
+    private Conditions conditions;
 
     @Override
-    public void define(ArrayList<String> fieldsValues, ArrayList<String> fields, ArrayList<String> fieldsTypes, String tableName, String id_fieldName, OHash<String, Object> whereData, Integer andConnector, Integer orConnector) {
+    public void define(ArrayList<String> fieldsValues, ArrayList<String> fields, ArrayList<String> fieldsTypes, String tableName, String id_fieldName, Conditions conditions) {
         this.fieldsValues = fieldsValues;
         this.fields = fields;
         this.tableName = tableName;
         this.id_fieldName = id_fieldName;
         this.fieldsTypes = fieldsTypes;
-        this.whereData = whereData;
-        this.andConnector = andConnector;
-        this.orConnector = orConnector;
+        this.conditions = conditions;
     }
 
     @Override
@@ -46,13 +41,16 @@ public class Process implements Transactions {
         for (int i = 0; i < fields.size(); i++) {
 
             key += ", " + fields.get(i) + "";
-            if (fieldsValues.get(i).contains("Transform(GeometryFromText"))
-                keyValue += ", " + fieldsValues.get(i) + " ";
-            else if (fieldsTypes.get(i).equals("BLOB"))
-                keyValue += ", X'" + fieldsValues.get(i) + "' ";
-            else
-                keyValue += ", '" + fieldsValues.get(i) + "'";
-
+            if (fieldsValues.get(i) != null) {
+                if (fieldsValues.get(i).contains("Transform(GeometryFromText"))
+                    keyValue += ", " + fieldsValues.get(i) + " ";
+                else if (fieldsTypes.get(i).equals("BLOB"))
+                    keyValue += ", X'" + fieldsValues.get(i) + "' ";
+                else
+                    keyValue += ", '" + fieldsValues.get(i) + "'";
+            } else {
+                keyValue += ", NULL ";
+            }
         }
 
         String keys = key.substring(2, key.length());
@@ -60,9 +58,9 @@ public class Process implements Transactions {
 
         String sql = "INSERT INTO " + tableName + " (" + keys + ") VALUES(" + keyValues + ")";
 
-
         OHibernateConfig.db.exec(sql, null);
 
+        Log.i("OHibernate -> Info", "Table Name:"+tableName+". Object INSERTED");
         try {
             return getLastID();
         } catch (Exception e) {
@@ -80,12 +78,16 @@ public class Process implements Transactions {
         String key = "";
 
         for (int i = 0; i < fields.size(); i++) {
-            if (fieldsValues.get(i).contains("Transform(GeometryFromText"))
-                key += ", " + fields.get(i) + "=" + fieldsValues.get(i) + " ";
-            else if (fieldsTypes.get(i).equals("BLOB"))
-                key += ", " + fields.get(i) + "= X'" + fieldsValues.get(i) + "'";
-            else
-                key += ", " + fields.get(i) + "='" + fieldsValues.get(i) + "'";
+            if (fieldsValues.get(i) != null) {
+                if (fieldsValues.get(i).contains("Transform(GeometryFromText"))
+                    key += ", " + fields.get(i) + "=" + fieldsValues.get(i) + " ";
+                else if (fieldsTypes.get(i).equals("BLOB"))
+                    key += ", " + fields.get(i) + "= X'" + fieldsValues.get(i) + "'";
+                else
+                    key += ", " + fields.get(i) + "='" + fieldsValues.get(i) + "'";
+            } else {
+                key += ", " + fields.get(i) + "= NULL ";
+            }
 
             if (fields.get(i).equals(id_fieldName))
                 id = fieldsValues.get(i);
@@ -96,23 +98,23 @@ public class Process implements Transactions {
         String sql = null;
 
         //-------->>Where
-        if (whereData != null && whereData.size() > 0) {
-            if(andConnector != null && andConnector>0){
+        if (this.conditions.getWhereData() != null && this.conditions.getWhereData().size() > 0) {
+            if (this.conditions.getAndConnector() != null && this.conditions.getAndConnector() > 0) {
                 String wherer = "";
-                for(int i = 0; i<whereData.getKeysArrayList().size();i++){
-                    wherer += " "+ whereData.getKeysArrayList().get(i) +"='"+whereData.getValuesArrayList().get(i)+"' and";
+                for (int i = 0; i < this.conditions.getWhereData().getKeysArrayList().size(); i++) {
+                    wherer += " " + this.conditions.getWhereData().getKeysArrayList().get(i) + "='" + this.conditions.getWhereData().getValuesArrayList().get(i) + "' and";
                 }
-                wherer = wherer.substring(0,wherer.length()-3);
-                sql = "UPDATE " + tableName + " SET " + keys + " WHERE"+wherer+" ";
-            }else if(orConnector != null && orConnector>0){
+                wherer = wherer.substring(0, wherer.length() - 3);
+                sql = "UPDATE " + tableName + " SET " + keys + " WHERE" + wherer + " ";
+            } else if (this.conditions.getOrConnector() != null && this.conditions.getOrConnector() > 0) {
                 String wherer = "";
-                for(int i = 0; i<whereData.getKeysArrayList().size();i++){
-                    wherer += " "+ whereData.getKeysArrayList().get(i) +"='"+whereData.getValuesArrayList().get(i)+"' or";
+                for (int i = 0; i < this.conditions.getWhereData().getKeysArrayList().size(); i++) {
+                    wherer += " " + this.conditions.getWhereData().getKeysArrayList().get(i) + "='" + this.conditions.getWhereData().getValuesArrayList().get(i) + "' or";
                 }
-                wherer = wherer.substring(0,wherer.length()-2);
-                sql = "UPDATE " + tableName + " SET " + keys + " WHERE"+wherer+" ";
-            }else{
-                sql = "UPDATE " + tableName + " SET " + keys + " WHERE " + whereData.getKey(0) + " = '" + whereData.getValue(0) + "'";
+                wherer = wherer.substring(0, wherer.length() - 2);
+                sql = "UPDATE " + tableName + " SET " + keys + " WHERE" + wherer + " ";
+            } else {
+                sql = "UPDATE " + tableName + " SET " + keys + " WHERE " + this.conditions.getWhereData().getKey(0) + " = '" + this.conditions.getWhereData().getValue(0) + "'";
             }
         } else {
             sql = "UPDATE " + tableName + " SET " + keys + " WHERE " + id_fieldName + " = '" + id + "'";
@@ -121,6 +123,7 @@ public class Process implements Transactions {
 
         OHibernateConfig.db.exec(sql, null);
 
+        Log.i("OHibernate -> Info", "Table Name:"+tableName+". Key:"+id_fieldName+". Value:"+id+". UPDATED");
     }
 
     @Override
@@ -129,12 +132,16 @@ public class Process implements Transactions {
         String keye = "";
 
         for (int i = 0; i < fields.size(); i++) {
-            if (fieldsValues.get(i).contains("Transform(GeometryFromText"))
-                keye += ", " + fields.get(i) + "=" + fieldsValues.get(i) + " ";
-            else if (fieldsTypes.get(i).equals("BLOB"))
-                keye += ", " + fields.get(i) + "= X'" + fieldsValues.get(i) + "'";
-            else
-                keye += ", " + fields.get(i) + "='" + fieldsValues.get(i) + "'";
+            if (fieldsValues.get(i) != null) {
+                if (fieldsValues.get(i).contains("Transform(GeometryFromText"))
+                    keye += ", " + fields.get(i) + "=" + fieldsValues.get(i) + " ";
+                else if (fieldsTypes.get(i).equals("BLOB"))
+                    keye += ", " + fields.get(i) + "= X'" + fieldsValues.get(i) + "'";
+                else
+                    keye += ", " + fields.get(i) + "='" + fieldsValues.get(i) + "'";
+            } else {
+                keye += ", " + fields.get(i) + "= NULL ";
+            }
         }
         String keys = keye.substring(2, keye.length());
 
@@ -142,6 +149,7 @@ public class Process implements Transactions {
 
         OHibernateConfig.db.exec(sql, null);
 
+        Log.i("OHibernate -> Info", "Table Name:"+tableName+". Key:"+key+". Value:"+value+". UPDATED");
     }
 
     //DELETE
@@ -158,23 +166,23 @@ public class Process implements Transactions {
         String sql = "DELETE FROM " + tableName + " WHERE " + id_fieldName + "='" + id + "'";
 
         //-------->>Where
-        if (whereData != null && whereData.size() > 0) {
-            if(andConnector != null && andConnector>0){
+        if (this.conditions.getWhereData() != null && this.conditions.getWhereData().size() > 0) {
+            if (this.conditions.getAndConnector() != null && this.conditions.getAndConnector() > 0) {
                 String wherer = "";
-                for(int i = 0; i<whereData.getKeysArrayList().size();i++){
-                    wherer += " "+ whereData.getKeysArrayList().get(i) +"='"+whereData.getValuesArrayList().get(i)+"' and";
+                for (int i = 0; i < this.conditions.getWhereData().getKeysArrayList().size(); i++) {
+                    wherer += " " + this.conditions.getWhereData().getKeysArrayList().get(i) + "='" + this.conditions.getWhereData().getValuesArrayList().get(i) + "' and";
                 }
-                wherer = wherer.substring(0,wherer.length()-3);
-                sql = "DELETE FROM "+ tableName +" WHERE" +wherer+" ";
-            }else if(orConnector != null && orConnector>0){
+                wherer = wherer.substring(0, wherer.length() - 3);
+                sql = "DELETE FROM " + tableName + " WHERE" + wherer + " ";
+            } else if (this.conditions.getOrConnector() != null && this.conditions.getOrConnector() > 0) {
                 String wherer = "";
-                for(int i = 0; i<whereData.getKeysArrayList().size();i++){
-                    wherer += " "+ whereData.getKeysArrayList().get(i) +"='"+whereData.getValuesArrayList().get(i)+"' or";
+                for (int i = 0; i < this.conditions.getWhereData().getKeysArrayList().size(); i++) {
+                    wherer += " " + this.conditions.getWhereData().getKeysArrayList().get(i) + "='" + this.conditions.getWhereData().getValuesArrayList().get(i) + "' or";
                 }
-                wherer = wherer.substring(0,wherer.length()-2);
-                sql = "DELETE FROM "+ tableName +" WHERE" +wherer+" ";
-            }else{
-                sql = "DELETE FROM "+ tableName +" WHERE " + whereData.getKey(0) + " = '" + whereData.getValue(0) + "'";
+                wherer = wherer.substring(0, wherer.length() - 2);
+                sql = "DELETE FROM " + tableName + " WHERE" + wherer + " ";
+            } else {
+                sql = "DELETE FROM " + tableName + " WHERE " + this.conditions.getWhereData().getKey(0) + " = '" + this.conditions.getWhereData().getValue(0) + "'";
             }
         } else {
             sql = "DELETE FROM " + tableName + " WHERE " + id_fieldName + "='" + id + "'";
@@ -183,6 +191,7 @@ public class Process implements Transactions {
 
         OHibernateConfig.db.exec(sql, null);
 
+        Log.i("OHibernate -> Info", "Table Name:"+tableName+". Key:"+id_fieldName+". Value:"+id+". DELETED");
     }
 
     @Override
@@ -192,6 +201,7 @@ public class Process implements Transactions {
 
         OHibernateConfig.db.exec(sql, null);
 
+        Log.i("OHibernate -> Info", "Table Name:"+tableName+". Key:"+key+". Value:"+value+". DELETED");
     }
 
     //----------------------------------------------------------------------------------------------

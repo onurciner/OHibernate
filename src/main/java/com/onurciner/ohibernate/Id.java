@@ -30,10 +30,19 @@ public @interface Id {
     /**
      * AUTO_ID ile aynı anda kullanılmaması gerekmektedir.
      * ID'nin mutlaka INTEGER olması gerekmektedir. Aksi taktirde hata çıkar.
+     *
      * @return default olarak false.
      * id sürekli pozitif olarak artım gösterir. ID'nin negatif veya değişkenlik gösterebilmesi için AUTO_ID kullanınız.
      */
     boolean PRIMARY_KEY_AUTOINCREMENT() default false;
 
+    /*
+    Tablodaki kolonun unique(benzersiz) yapar. Benzeri bir veri gönderilirse hata döner.
+     */
     boolean UNIQUE() default false;
+
+    /*
+   Db'deki tabloyu not null özelliği ekler. Bu özelliği kullanan field set edilmeden gönderilemez.
+   */
+    boolean NOTNULL() default false;
 }

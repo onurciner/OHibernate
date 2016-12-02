@@ -22,6 +22,23 @@ public @interface Column {
      */
     boolean DATETIME() default false;
 
-
+    /*
+    Tablodaki kolonun unique(benzersiz) yapar. Benzeri bir veri gönderilirse hata döner.
+     */
     boolean UNIQUE() default false;
+
+    /*
+    Db'deki tabloyu not null özelliği ekler. Bu özelliği kullanan field set edilmeden gönderilemez.
+     */
+    boolean NOTNULL() default false;
+
+    /*
+    İlgili kolunun maksimum değerini 1 arttırarak kayıt eder.
+     */
+    boolean AUTO_INCREMENT_NUMBER() default false;
+
+    /*
+    İlgili koluna random integer değer kayıt eder. 899 milyon veriye kadar unique olma garantisi vardır. 899 milyon veriden sonra 0(sıfır) değeri atanır.
+     */
+    boolean AUTO_RANDOM_NUMBER() default false;
 }

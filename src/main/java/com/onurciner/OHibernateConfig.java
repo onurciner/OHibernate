@@ -1,6 +1,6 @@
 package com.onurciner;
 
-import com.nutiteq.log.Log;
+import android.util.Log;
 
 import jsqlite.Database;
 import jsqlite.Exception;
@@ -15,7 +15,7 @@ public class OHibernateConfig {
 
     private static OHibernateConfig config = null;
 
-    static public Database db;
+    static protected Database db;
 
     public OHibernateConfig() {
 
@@ -29,7 +29,7 @@ public class OHibernateConfig {
             try {
                 db.open(DB_PATH+DB_NAME, jsqlite.Constants.SQLITE_OPEN_READWRITE);
             } catch (Exception e) {
-                Log.error("Failed to open database! " + e.getMessage());
+                Log.e("OHibernate - Database Problem -> Error", "Failed to open database! " + e.getMessage());
             }
         }
         return config;
@@ -41,6 +41,10 @@ public class OHibernateConfig {
             db = database;
         }
         return config;
+    }
+
+    public static Database getDb() {
+        return db;
     }
 
 }

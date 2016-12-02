@@ -1,5 +1,7 @@
 package com.onurciner.ohibernate;
 
+import com.onurciner.enums.GeometryType;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -16,9 +18,7 @@ public @interface GeometryColumn {
 
     int SRID() default 4326;
 
-    GEO_TYPE GEO_TYPE() default GEO_TYPE.GEOMETRY;
+    GeometryType GEOMETRY_TYPE() default GeometryType.GEOMETRY;
 
-    public enum GEO_TYPE {
-        POINT, LINESTRING, POLYGON, MULTIPOINT, MULTILINESTRING, MULTIPOLYGON, GEOMETRY
-    }
+
 }

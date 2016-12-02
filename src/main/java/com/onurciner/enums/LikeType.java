@@ -1,10 +1,10 @@
 package com.onurciner.enums;
 
 /**
- * Created by onur.ciner on 24.11.2016.
+ * Created by Onur.Ciner on 24.11.2016.
  */
 
-public enum LIKE_TYPE {
+public enum LikeType {
 
     FRONT, BEHIND, BOTH
 

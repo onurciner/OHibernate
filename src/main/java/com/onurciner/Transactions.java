@@ -1,6 +1,6 @@
 package com.onurciner;
 
-import com.onurciner.ohibernatetools.OHash;
+import com.onurciner.ohibernatetools.Conditions;
 
 import java.util.ArrayList;
 
@@ -12,7 +12,7 @@ import jsqlite.Exception;
 
 public interface Transactions {
 
-    public void define(ArrayList<String> fieldsValues, ArrayList<String> fields, ArrayList<String> fieldsTypes, String tableName, String id_fieldName, OHash<String,Object> whereData, Integer andConnector, Integer orConnector);
+    public void define(ArrayList<String> fieldsValues, ArrayList<String> fields, ArrayList<String> fieldsTypes, String tableName, String id_fieldName, Conditions conditions);
 
     public String insert() throws Exception;
 
@@ -24,4 +24,3 @@ public interface Transactions {
 
     public void delete(String key, Object value) throws Exception;
 }
-
