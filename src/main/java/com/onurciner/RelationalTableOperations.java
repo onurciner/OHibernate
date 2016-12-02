@@ -15,6 +15,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import jsqlite.Exception;
 import jsqlite.Stmt;
@@ -121,10 +122,10 @@ public class RelationalTableOperations {
 
                             if (status == 1) {
                                 if (Cascade.contains(1) || Cascade.contains(2) || Cascade.contains(3))
-                                    directional.insert(OneToOne.getOneBean(i));
+                                    directional.persist(OneToOne.getOneBean(i));
                             } else if (status == 2) {
                                 if (Cascade.contains(1) || Cascade.contains(2) || Cascade.contains(4))
-                                    directional.update(OneToOne.getOneBean(i));
+                                    directional.persist(OneToOne.getOneBean(i));
                             } else if (status == 3) {
                                 if (Cascade.contains(1) || Cascade.contains(5))
                                     directional.delete(OneToOne.getOneBean(i));
@@ -185,14 +186,71 @@ public class RelationalTableOperations {
                                             Cascade = 5;
 
                                     if (status == 1) {
-                                        if (Cascade == 1 || Cascade == 2 || Cascade == 3)
-                                            directional.insert(obje);
+                                        if (Cascade == 1 || Cascade == 2 || Cascade == 3) {
+                                            String id = directional.persist(obje);
+                                            for (int r = 0; r < ((ArrayList) OneToOne.getOneBean(i)).size(); r++) {
+                                                if (((ArrayList) OneToOne.getOneBean(i)).get(r).equals(obje)) {
+                                                    ((ArrayList) OneToOne.getOneBean(i)).set(r, directional.select(OneToOne.getKey(i).toString(), id));
+                                                }
+                                            }
+                                        }
                                     } else if (status == 2) {
-                                        if (Cascade == 1 || Cascade == 2 || Cascade == 4)
-                                            directional.update(obje);
+                                        if (Cascade == 1 || Cascade == 2 || Cascade == 4) {
+                                            String id = directional.persist(obje);
+                                            for (int r = 0; r < ((ArrayList) OneToOne.getOneBean(i)).size(); r++) {
+                                                if (((ArrayList) OneToOne.getOneBean(i)).get(r).equals(obje)) {
+                                                    ((ArrayList) OneToOne.getOneBean(i)).set(r, directional.select(OneToOne.getKey(i).toString(), id));
+                                                }
+                                            }
+                                        }
                                     } else if (status == 3) {
                                         if (Cascade == 1 || Cascade == 5)
                                             directional.delete(obje);
+                                    }
+                                }
+                                String masterObjID = null;
+                                for (int s = 0; s < fields.size(); s++) {
+                                    if (fields.get(s).equals(OneToOne.getKey(i).toString())) {
+                                        masterObjID = fieldsValues.get(s);
+                                    }
+                                }
+                                Directional directional = new Directional<>((Class) ((ArrayList) OneToOne.getOneBean(0)).get(0).getClass());
+                                ArrayList<?> arrayList = directional.selectAll(OneToOne.getJoinColumn(i).toString(), masterObjID);
+
+                                Iterator<Object> rr = (Iterator<Object>) arrayList.iterator();
+                                while (rr.hasNext()) {
+                                    Object o = rr.next();
+                                    boolean varmi = false;
+                                    for (int y = 0; y < ((ArrayList) OneToOne.getOneBean(i)).size(); y++) {
+                                        Field[] all = ((ArrayList) OneToOne.getOneBean(i)).get(y).getClass().getDeclaredFields();
+                                        for (Field field : all) {
+                                            if (field.isAnnotationPresent(Id.class)) {
+                                                field.setAccessible(true);
+
+                                                Field[] allRR = o.getClass().getDeclaredFields();
+                                                for (Field fieldRR : allRR) {
+                                                    if (fieldRR.isAnnotationPresent(Id.class)) {
+                                                        fieldRR.setAccessible(true);
+
+                                                        if (field.get(((ArrayList) OneToOne.getOneBean(i)).get(y)).equals(fieldRR.get(o))) {
+                                                            varmi = true;
+                                                        }
+                                                    }
+                                                }
+
+                                            }
+                                        }
+
+                                    }
+                                    if (varmi) {
+                                        rr.remove();
+                                    }
+
+                                }
+
+                                if (arrayList != null && arrayList.size() > 0) {
+                                    for (Object obj : arrayList) {
+                                        directional.delete(obj);
                                     }
                                 }
                             }
@@ -242,16 +300,75 @@ public class RelationalTableOperations {
                                             Cascade.add(5);
 
                                     if (status == 1) {
-                                        if (Cascade.contains(1) || Cascade.contains(2) || Cascade.contains(3))
-                                            directional.insert(obje);
+                                        if (Cascade.contains(1) || Cascade.contains(2) || Cascade.contains(3)) {
+                                            String id = directional.persist(obje);
+                                            for (int r = 0; r < ((ArrayList) OneToOne.getOneBean(i)).size(); r++) {
+                                                if (((ArrayList) OneToOne.getOneBean(i)).get(r).equals(obje)) {
+                                                    ((ArrayList) OneToOne.getOneBean(i)).set(r, directional.select(id_fieldName, id));
+                                                }
+                                            }
+                                        }
                                     } else if (status == 2) {
-                                        if (Cascade.contains(1) || Cascade.contains(2) || Cascade.contains(4))
-                                            directional.update(obje);
+                                        if (Cascade.contains(1) || Cascade.contains(2) || Cascade.contains(4)) {
+                                            String id = directional.persist(obje);
+                                            for (int r = 0; r < ((ArrayList) OneToOne.getOneBean(i)).size(); r++) {
+                                                if (((ArrayList) OneToOne.getOneBean(i)).get(r).equals(obje)) {
+                                                    ((ArrayList) OneToOne.getOneBean(i)).set(r, directional.select(id_fieldName, id));
+                                                }
+                                            }
+                                        }
                                     } else if (status == 3) {
                                         if (Cascade.contains(1) || Cascade.contains(5))
                                             directional.delete(obje);
                                     }
+
                                 }
+                                String masterObjID = null;
+                                for (int s = 0; s < fields.size(); s++) {
+                                    if (fields.get(s).equals(id_fieldName)) {
+                                        masterObjID = fieldsValues.get(s);
+                                    }
+                                }
+                                Directional directional = new Directional<>((Class) ((ArrayList) OneToOne.getOneBean(0)).get(0).getClass());
+                                ArrayList<?> arrayList = directional.selectAll(OneToOne.getJoinColumn(i).toString(), masterObjID);
+
+                                Iterator<Object> rr = (Iterator<Object>) arrayList.iterator();
+                                while (rr.hasNext()) {
+                                    Object o = rr.next();
+                                    boolean varmi = false;
+                                    for (int y = 0; y < ((ArrayList) OneToOne.getOneBean(i)).size(); y++) {
+                                        Field[] all = ((ArrayList) OneToOne.getOneBean(i)).get(y).getClass().getDeclaredFields();
+                                        for (Field field : all) {
+                                            if (field.isAnnotationPresent(Id.class)) {
+                                                field.setAccessible(true);
+
+                                                Field[] allRR = o.getClass().getDeclaredFields();
+                                                for (Field fieldRR : allRR) {
+                                                    if (fieldRR.isAnnotationPresent(Id.class)) {
+                                                        fieldRR.setAccessible(true);
+
+                                                        if (field.get(((ArrayList) OneToOne.getOneBean(i)).get(y)).equals(fieldRR.get(o))) {
+                                                            varmi = true;
+                                                        }
+                                                    }
+                                                }
+
+                                            }
+                                        }
+
+                                    }
+                                    if (varmi) {
+                                        rr.remove();
+                                    }
+
+                                }
+
+                                if (arrayList != null && arrayList.size() > 0) {
+                                    for (Object obj : arrayList) {
+                                        directional.delete(obj);
+                                    }
+                                }
+
                             }
                         } catch (IllegalAccessException e) {
                             e.printStackTrace();
@@ -548,7 +665,7 @@ public class RelationalTableOperations {
 
                         Directional directional = new Directional<>((Class<?>) arr[0]);
                         ArrayList<Object> twoData = new ArrayList<>();
-                        for(String idr : ob){
+                        for (String idr : ob) {
                             Object o = directional.select(idColumnName, idr);
                             twoData.add(o);
                         }

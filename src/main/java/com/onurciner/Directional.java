@@ -1,5 +1,7 @@
 package com.onurciner;
 
+import java.util.ArrayList;
+
 import jsqlite.Exception;
 
 /**
@@ -13,6 +15,15 @@ public class Directional<K> {
     protected Directional(Class<K> kClass) {
         this.kClass = kClass;
         oHibernate = new OHibernate(kClass);
+    }
+
+    protected String persist(Object obj) {
+        try {
+            return oHibernate.persist(obj);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     protected String insert(Object obj) {
@@ -49,9 +60,9 @@ public class Directional<K> {
         return null;
     }
 
-    protected K selectAll(String key, Object value) {
+    protected ArrayList<K> selectAll(String key, Object value) {
         try {
-            return (K) oHibernate.selectAll(key, value);
+            return (ArrayList<K>) oHibernate.selectAll(key, value);
         } catch (Exception e) {
             e.printStackTrace();
         }
