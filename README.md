@@ -1,10 +1,11 @@
 # OHibernate
-1.0.4
+1.0.5
 
 SQLite Connection for Android. ORM tool for Android devices.
 First ORM with Geometric-Spatial data support for Android operating systems.
 
-There is relational table support. OneToOne and OneToMany are fully supported.
+There is relational table support. OneToOne and OneToMany are fully supported. 
+OHQL support for simple inquiries.
 
 ##Installation
 
@@ -19,7 +20,7 @@ To use the library, first include it your project using Gradle
 and:
 
         dependencies {
-                compile 'com.github.10uroi:OHibernate:1.0.4'
+                compile 'com.github.10uroi:OHibernate:1.0.5'
         }
 ##How to use
 
@@ -270,3 +271,46 @@ and:
     </td>
   </tr>
 </table>
+
+## OHQL (The OHibernate Query Language)
+### Single Select
+	User user = (User) new OQuery()
+		.addEntity(User.class)		//=>Returns a String if entity is not added
+		.Select("*")
+		.From("users")				//=> "users"->table name
+		.Where("id",2)
+		.getSingleResult();			//=> Fetch user with id 2 in the users table
+### List Select
+	ArrayList<User> users = new OQuery()
+		.addEntity(User.class)		//=>Returns a String if entity is not added
+		.Select("*")
+		.From("users")				//=> "users"->table name
+		.list();					//=> Brings all users in the users table
+### Insert Query
+	new OQuery()
+		.SetParameter("firstName","Onur")
+		.SetParameter("lastName","Ciner")
+		.Insert("users");			//=> "users"->table name
+### Insert Entity Query
+	Users user = new Users();					//=>The object is created
+	user.setFirstName("Onur");
+	user.setLastName("Ciner");
+	new OQuery().InsertEntity("users",user);	//=> "users"->table name
+### Update Query
+	new OQuery()
+		.SetParameter("firstName", "Selçuk")
+		.SetParameter("lastName", "Uzunsoy")
+		.Where("id", 15)				//=> User with id 15 will be updated
+		.Update("users"); 				//=> "users"->table name
+### Update Entity Query
+	Users user = OQuery().Select...;			//=> Object brought
+	user.setFirstName("Onur");
+	user.setLastName("Ciner");
+	new OQuery().UpdateEntity("users",user);	//=> "users"->table name
+### Delete Query
+	new OQuery()
+		.Where("id",15)		//=> User with id 15 will be deleted
+		.Delete("users");	//=> "users"->table name
+### DeleteAll Query
+	new OQuery()
+		.DeleteAll("users");	//=> All users in the users table will be deleted
