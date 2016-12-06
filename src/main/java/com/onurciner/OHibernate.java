@@ -8,6 +8,7 @@ import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.Polygon;
 import com.nutiteq.utils.WktWriter;
 import com.onurciner.enums.CascadeType;
+import com.onurciner.enums.ConditionType;
 import com.onurciner.enums.FetchType;
 import com.onurciner.enums.GeometryType;
 import com.onurciner.enums.LikeType;
@@ -35,7 +36,7 @@ import jsqlite.Stmt;
 
 /**
  * Created by Onur.Ciner on 7.11.2016.
- * VERSION 1.0.3
+ * VERSION 1.0.5
  * ### LOG 1 - 22.11.2016 ###
  * -Birden fazla where koşulu desteği geldi. Where koşullarını bağlamak için and ve or bağlaçları getirildi.
  * -Like sistemi değişti. Where metodunun içerisine 3. parametre olarak like koşulu verilebilmektedir.
@@ -1128,12 +1129,21 @@ public class OHibernate<K> {
     public OHibernate where(String key, Object value) {
         this.conditions.getWhereData().add(key, value);
         this.conditions.getLike().add(null);
+        this.conditions.getCondition().add(null);
         return this;
     }
 
     public OHibernate where(String key, Object value, LikeType like) {
         this.conditions.getWhereData().add(key, value);
         this.conditions.getLike().add(like);
+        this.conditions.getCondition().add(null);
+        return this;
+    }
+
+    public OHibernate Where(String key, Object value, ConditionType condition) {
+        this.conditions.getWhereData().add(key, value);
+        this.conditions.getLike().add(null);
+        this.conditions.getCondition().add(condition);
         return this;
     }
 

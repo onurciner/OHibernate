@@ -1,6 +1,6 @@
 package com.onurciner.ohibernatetools;
 
-
+import com.onurciner.enums.ConditionType;
 import com.onurciner.enums.LikeType;
 import com.onurciner.enums.OrderByType;
 
@@ -19,6 +19,8 @@ public class Conditions {
     private Integer andConnector = 0;
 
     private ArrayList<LikeType> like = new ArrayList<>();
+
+    private ArrayList<ConditionType> condition = new ArrayList<>();
 
     private OHash<String, Object> whereData = new OHash<>();
 
@@ -82,5 +84,13 @@ public class Conditions {
 
     public void setOrderbyData(OHash<String, OrderByType> orderbyData) {
         this.orderbyData = orderbyData;
+    }
+
+    public ArrayList<ConditionType> getCondition() {
+        return condition;
+    }
+
+    public void setCondition(ArrayList<ConditionType> condition) {
+        this.condition = condition;
     }
 }

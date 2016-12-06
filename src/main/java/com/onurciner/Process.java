@@ -2,6 +2,8 @@ package com.onurciner;
 
 import android.util.Log;
 
+import com.onurciner.enums.ConditionType;
+import com.onurciner.enums.LikeType;
 import com.onurciner.ohibernatetools.Conditions;
 
 import java.util.ArrayList;
@@ -60,7 +62,7 @@ public class Process implements Transactions {
 
         OHibernateConfig.db.exec(sql, null);
 
-        Log.i("OHibernate -> Info", "Table Name:"+tableName+". Object INSERTED");
+        Log.i("OHibernate -> Info", "Table Name:" + tableName + ". Object INSERTED");
         try {
             return getLastID();
         } catch (Exception e) {
@@ -95,27 +97,13 @@ public class Process implements Transactions {
         }
         String keys = key.substring(2, key.length());
 
-        String sql = null;
+        String sql = "";
 
         //-------->>Where
         if (this.conditions.getWhereData() != null && this.conditions.getWhereData().size() > 0) {
-            if (this.conditions.getAndConnector() != null && this.conditions.getAndConnector() > 0) {
-                String wherer = "";
-                for (int i = 0; i < this.conditions.getWhereData().getKeysArrayList().size(); i++) {
-                    wherer += " " + this.conditions.getWhereData().getKeysArrayList().get(i) + "='" + this.conditions.getWhereData().getValuesArrayList().get(i) + "' and";
-                }
-                wherer = wherer.substring(0, wherer.length() - 3);
-                sql = "UPDATE " + tableName + " SET " + keys + " WHERE" + wherer + " ";
-            } else if (this.conditions.getOrConnector() != null && this.conditions.getOrConnector() > 0) {
-                String wherer = "";
-                for (int i = 0; i < this.conditions.getWhereData().getKeysArrayList().size(); i++) {
-                    wherer += " " + this.conditions.getWhereData().getKeysArrayList().get(i) + "='" + this.conditions.getWhereData().getValuesArrayList().get(i) + "' or";
-                }
-                wherer = wherer.substring(0, wherer.length() - 2);
-                sql = "UPDATE " + tableName + " SET " + keys + " WHERE" + wherer + " ";
-            } else {
-                sql = "UPDATE " + tableName + " SET " + keys + " WHERE " + this.conditions.getWhereData().getKey(0) + " = '" + this.conditions.getWhereData().getValue(0) + "'";
-            }
+            String wherer = UpDeWHERE("");
+
+            sql = "UPDATE " + tableName + " SET " + keys + " WHERE" + wherer + " ";
         } else {
             sql = "UPDATE " + tableName + " SET " + keys + " WHERE " + id_fieldName + " = '" + id + "'";
         }
@@ -123,7 +111,7 @@ public class Process implements Transactions {
 
         OHibernateConfig.db.exec(sql, null);
 
-        Log.i("OHibernate -> Info", "Table Name:"+tableName+". Key:"+id_fieldName+". Value:"+id+". UPDATED");
+        Log.i("OHibernate -> Info", "Table Name:" + tableName + ". Key:" + id_fieldName + ". Value:" + id + ". UPDATED");
     }
 
     @Override
@@ -149,7 +137,7 @@ public class Process implements Transactions {
 
         OHibernateConfig.db.exec(sql, null);
 
-        Log.i("OHibernate -> Info", "Table Name:"+tableName+". Key:"+key+". Value:"+value+". UPDATED");
+        Log.i("OHibernate -> Info", "Table Name:" + tableName + ". Key:" + key + ". Value:" + value + ". UPDATED");
     }
 
     //DELETE
@@ -163,27 +151,13 @@ public class Process implements Transactions {
                 id = fieldsValues.get(i);
         }
 
-        String sql = "DELETE FROM " + tableName + " WHERE " + id_fieldName + "='" + id + "'";
+        String sql = "";
 
         //-------->>Where
         if (this.conditions.getWhereData() != null && this.conditions.getWhereData().size() > 0) {
-            if (this.conditions.getAndConnector() != null && this.conditions.getAndConnector() > 0) {
-                String wherer = "";
-                for (int i = 0; i < this.conditions.getWhereData().getKeysArrayList().size(); i++) {
-                    wherer += " " + this.conditions.getWhereData().getKeysArrayList().get(i) + "='" + this.conditions.getWhereData().getValuesArrayList().get(i) + "' and";
-                }
-                wherer = wherer.substring(0, wherer.length() - 3);
-                sql = "DELETE FROM " + tableName + " WHERE" + wherer + " ";
-            } else if (this.conditions.getOrConnector() != null && this.conditions.getOrConnector() > 0) {
-                String wherer = "";
-                for (int i = 0; i < this.conditions.getWhereData().getKeysArrayList().size(); i++) {
-                    wherer += " " + this.conditions.getWhereData().getKeysArrayList().get(i) + "='" + this.conditions.getWhereData().getValuesArrayList().get(i) + "' or";
-                }
-                wherer = wherer.substring(0, wherer.length() - 2);
-                sql = "DELETE FROM " + tableName + " WHERE" + wherer + " ";
-            } else {
-                sql = "DELETE FROM " + tableName + " WHERE " + this.conditions.getWhereData().getKey(0) + " = '" + this.conditions.getWhereData().getValue(0) + "'";
-            }
+            String wherer = UpDeWHERE("");
+
+            sql = "DELETE FROM " + tableName + " WHERE" + wherer + " ";
         } else {
             sql = "DELETE FROM " + tableName + " WHERE " + id_fieldName + "='" + id + "'";
         }
@@ -191,7 +165,7 @@ public class Process implements Transactions {
 
         OHibernateConfig.db.exec(sql, null);
 
-        Log.i("OHibernate -> Info", "Table Name:"+tableName+". Key:"+id_fieldName+". Value:"+id+". DELETED");
+        Log.i("OHibernate -> Info", "Table Name:" + tableName + ". Key:" + id_fieldName + ". Value:" + id + ". DELETED");
     }
 
     @Override
@@ -201,7 +175,7 @@ public class Process implements Transactions {
 
         OHibernateConfig.db.exec(sql, null);
 
-        Log.i("OHibernate -> Info", "Table Name:"+tableName+". Key:"+key+". Value:"+value+". DELETED");
+        Log.i("OHibernate -> Info", "Table Name:" + tableName + ". Key:" + key + ". Value:" + value + ". DELETED");
     }
 
     //----------------------------------------------------------------------------------------------
@@ -273,6 +247,53 @@ public class Process implements Transactions {
             }
         }
         return "0";
+    }
+
+    private String UpDeWHERE(String wherer){
+        String connector = "and"; // And Or bağlacı eksikse Otomatik olarak And Koyar
+        if (conditions.getAndConnector() > 0) {
+            connector = "and";
+        } else if (conditions.getOrConnector() > 0)
+            connector = "or";
+
+        for (int i = 0; i < this.conditions.getWhereData().getKeysArrayList().size(); i++) {
+            if (conditions.getLike().get(i) == LikeType.FRONT)
+                wherer += " " + this.conditions.getWhereData().getKeysArrayList().get(i) + " like '%" + this.conditions.getWhereData().getValuesArrayList().get(i) + "' " + connector;
+            else if (conditions.getLike().get(i) == LikeType.BEHIND)
+                wherer += " " + this.conditions.getWhereData().getKeysArrayList().get(i) + " like '" + this.conditions.getWhereData().getValuesArrayList().get(i) + "%' " + connector;
+            else if (conditions.getLike().get(i) == LikeType.BOTH)
+                wherer += " " + this.conditions.getWhereData().getKeysArrayList().get(i) + " like '%" + this.conditions.getWhereData().getValuesArrayList().get(i) + "%' " + connector;
+            else if (conditions.getCondition().get(i) == ConditionType.MAX)
+                wherer += " " + this.conditions.getWhereData().getKeysArrayList().get(i) + " > '" + this.conditions.getWhereData().getValuesArrayList().get(i) + "' " + connector;
+            else if (conditions.getCondition().get(i) == ConditionType.MIN)
+                wherer += " " + this.conditions.getWhereData().getKeysArrayList().get(i) + " < '" + this.conditions.getWhereData().getValuesArrayList().get(i) + "' " + connector;
+            else if (conditions.getCondition().get(i) == ConditionType.EQUAL)
+                wherer += " " + this.conditions.getWhereData().getKeysArrayList().get(i) + " == '" + this.conditions.getWhereData().getValuesArrayList().get(i) + "' " + connector;
+            else if (conditions.getCondition().get(i) == ConditionType.NOT_EQUAL)
+                wherer += " " + this.conditions.getWhereData().getKeysArrayList().get(i) + " <> '" + this.conditions.getWhereData().getValuesArrayList().get(i) + "' " + connector;
+            else if (conditions.getCondition().get(i) == ConditionType.MIN_EQUAL)
+                wherer += " " + this.conditions.getWhereData().getKeysArrayList().get(i) + " <= '" + this.conditions.getWhereData().getValuesArrayList().get(i) + "' " + connector;
+            else if (conditions.getCondition().get(i) == ConditionType.MAX_EQUAL)
+                wherer += " " + this.conditions.getWhereData().getKeysArrayList().get(i) + " >= '" + this.conditions.getWhereData().getValuesArrayList().get(i) + "' " + connector;
+            else if (conditions.getCondition().get(i) == ConditionType.IS)
+                wherer += " " + this.conditions.getWhereData().getKeysArrayList().get(i) + " IS '" + this.conditions.getWhereData().getValuesArrayList().get(i) + "' " + connector;
+            else if (conditions.getCondition().get(i) == ConditionType.IS_NOT)
+                wherer += " " + this.conditions.getWhereData().getKeysArrayList().get(i) + " IS NOT '" + this.conditions.getWhereData().getValuesArrayList().get(i) + "' " + connector;
+            else
+                wherer += " " + this.conditions.getWhereData().getKeysArrayList().get(i) + "='" + this.conditions.getWhereData().getValuesArrayList().get(i) + "' " + connector;
+        }
+        if (connector.equals("and")) {
+            wherer = wherer.substring(0, wherer.length() - 3);
+        } else if (connector.equals("or"))
+            wherer = wherer.substring(0, wherer.length() - 2);
+
+        if (conditions.getOrderbyData() != null && conditions.getOrderbyData().size() > 0) {
+            wherer += " ORDER BY " + conditions.getOrderbyData().getKey(0) + " " + conditions.getOrderbyData().getValue(0) + " ";
+        }
+        if (conditions.getLimit() != null)
+            wherer += " LIMIT " + conditions.getLimit() + " ";
+
+        return wherer;
     }
 
 }
