@@ -48,8 +48,13 @@ public class Process implements Transactions {
                     keyValue += ", " + fieldsValues.get(i) + " ";
                 else if (fieldsTypes.get(i).equals("BLOB"))
                     keyValue += ", X'" + fieldsValues.get(i) + "' ";
-                else
-                    keyValue += ", '" + fieldsValues.get(i) + "'";
+                else {
+                    if (fieldsValues.get(i).contains("'")) {
+                        String value = fieldsValues.get(i).replace("'", "''");
+                        keyValue += ", '" + value + "'";
+                    } else
+                        keyValue += ", '" + fieldsValues.get(i) + "'";
+                }
             } else {
                 keyValue += ", NULL ";
             }
@@ -85,8 +90,13 @@ public class Process implements Transactions {
                     key += ", " + fields.get(i) + "=" + fieldsValues.get(i) + " ";
                 else if (fieldsTypes.get(i).equals("BLOB"))
                     key += ", " + fields.get(i) + "= X'" + fieldsValues.get(i) + "'";
-                else
-                    key += ", " + fields.get(i) + "='" + fieldsValues.get(i) + "'";
+                else {
+                    if (fieldsValues.get(i).contains("'")) {
+                        String value = fieldsValues.get(i).replace("'", "''");
+                        key += ", " + fields.get(i) + "='" + value + "'";
+                    } else
+                        key += ", " + fields.get(i) + "='" + fieldsValues.get(i) + "'";
+                }
             } else {
                 key += ", " + fields.get(i) + "= NULL ";
             }
@@ -125,8 +135,13 @@ public class Process implements Transactions {
                     keye += ", " + fields.get(i) + "=" + fieldsValues.get(i) + " ";
                 else if (fieldsTypes.get(i).equals("BLOB"))
                     keye += ", " + fields.get(i) + "= X'" + fieldsValues.get(i) + "'";
-                else
-                    keye += ", " + fields.get(i) + "='" + fieldsValues.get(i) + "'";
+                else {
+                    if (fieldsValues.get(i).contains("'")) {
+                        String valuew = fieldsValues.get(i).replace("'", "''");
+                        keye += ", " + fields.get(i) + "='" + valuew + "'";
+                    } else
+                        keye += ", " + fields.get(i) + "='" + fieldsValues.get(i) + "'";
+                }
             } else {
                 keye += ", " + fields.get(i) + "= NULL ";
             }
@@ -170,6 +185,11 @@ public class Process implements Transactions {
 
     @Override
     public void delete(String key, Object value) throws Exception {
+        if(value instanceof String){
+            if (value.toString().contains("'")) {
+                value = value.toString().replace("'", "''");
+            }
+        }
 
         String sql = "DELETE FROM " + tableName + " WHERE " + key + "='" + value + "'";
 
@@ -249,7 +269,7 @@ public class Process implements Transactions {
         return "0";
     }
 
-    private String UpDeWHERE(String wherer){
+    private String UpDeWHERE(String wherer) {
         String connector = "and"; // And Or bağlacı eksikse Otomatik olarak And Koyar
         if (conditions.getAndConnector() > 0) {
             connector = "and";

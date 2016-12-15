@@ -21,13 +21,13 @@ public class OHibernateConfig {
 
     }
 
-    public static OHibernateConfig getConfig(){
-        if(config == null){
+    public static OHibernateConfig getConfig() {
+        if (config == null) {
             config = new OHibernateConfig();
 
             db = new Database();
             try {
-                db.open(DB_PATH+DB_NAME, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+                db.open(DB_PATH + DB_NAME, jsqlite.Constants.SQLITE_OPEN_READWRITE);
             } catch (Exception e) {
                 Log.e("OHibernate - Database Problem -> Error", "Failed to open database! " + e.getMessage());
             }
@@ -35,8 +35,8 @@ public class OHibernateConfig {
         return config;
     }
 
-    public static OHibernateConfig setDatabase(Database database){
-        if(config == null){
+    public static OHibernateConfig setDatabase(Database database) {
+        if (config == null) {
             config = new OHibernateConfig();
             db = database;
         }
