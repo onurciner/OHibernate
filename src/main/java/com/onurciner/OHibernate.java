@@ -905,7 +905,9 @@ public class OHibernate<K> {
             Log.e("OHibernate - Engine Problem -> Error", e.getMessage());
         }
 
-        return new Selections<K>(classType).select(this.fields, this.conditions, this.tableName, null, null);
+        K data = new Selections<K>(classType).select(this.fields, this.conditions, this.tableName, null, null);
+        restart();
+        return data;
 
     }
 
@@ -922,7 +924,9 @@ public class OHibernate<K> {
             Log.e("OHibernate - Engine Problem -> Error", e.getMessage());
         }
 
-        return new Selections<K>(classType).select(this.fields, this.conditions, this.tableName, key, value);
+        K data =  new Selections<K>(classType).select(this.fields, this.conditions, this.tableName, key, value);
+        restart();
+        return data;
 
     }
 
@@ -939,7 +943,9 @@ public class OHibernate<K> {
             Log.e("OHibernate - Engine Problem -> Error", e.getMessage());
         }
 
-        return new Selections<K>(classType).selectAll(this.fields, this.conditions, this.tableName, key, value);
+        ArrayList<K> datas = new Selections<K>(classType).selectAll(this.fields, this.conditions, this.tableName, key, value);
+        restart();
+        return datas;
 
     }
 
@@ -961,8 +967,9 @@ public class OHibernate<K> {
             Log.e("OHibernate - Engine Problem -> Error", e.getMessage());
         }
 
-        return new Selections<K>(classType).selectAll(this.fields, this.conditions, this.tableName, null, null);
-
+        ArrayList<K> datas = new Selections<K>(classType).selectAll(this.fields, this.conditions, this.tableName, null, null);
+        restart();
+        return datas;
     }
 
     //----------------------------------------------------------------------------------------------
