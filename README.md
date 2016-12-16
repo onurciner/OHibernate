@@ -1,11 +1,14 @@
 # OHibernate
-1.0.5
+1.0.6
 
 SQLite Connection for Android. ORM tool for Android devices.
 First ORM with Geometric-Spatial data support for Android operating systems.
 
 There is relational table support. OneToOne and OneToMany are fully supported. 
 OHQL support for simple inquiries.
+
+#### Log
+v1.0.6 -> Solved single quotes problem.
 
 ##Installation
 
@@ -20,7 +23,7 @@ To use the library, first include it your project using Gradle
 and:
 
         dependencies {
-                compile 'com.github.10uroi:OHibernate:1.0.5'
+                compile 'com.github.10uroi:OHibernate:1.0.6'
         }
 ##How to use
 
