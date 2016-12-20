@@ -198,6 +198,14 @@ public class Process implements Transactions {
         Log.i("OHibernate -> Info", "Table Name:" + tableName + ". Key:" + key + ". Value:" + value + ". DELETED");
     }
 
+    public void deleteAll() throws Exception {
+
+        String sql = "DELETE FROM " + tableName + " ";
+
+        OHibernateConfig.db.exec(sql, null);
+
+        Log.i("OHibernate -> Info", "Table Name:" + tableName + ". All Table Datas. DELETED");
+    }
     //----------------------------------------------------------------------------------------------
     //----------------------------------------------------------------------------------------------
     //----------------------------------------------------------------------------------------------

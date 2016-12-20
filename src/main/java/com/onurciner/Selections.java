@@ -5,6 +5,7 @@ import android.util.Log;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.utils.Utils;
 import com.nutiteq.utils.WkbRead;
+import com.onurciner.enums.ConditionType;
 import com.onurciner.enums.LikeType;
 import com.onurciner.ohibernate.Blob;
 import com.onurciner.ohibernate.Column;
@@ -61,6 +62,22 @@ public class Selections<K> {
                         sql += conditions.getWhereData().getKey(i) + " like '" + conditions.getWhereData().getValue(i) + "%' " + connector;
                     else if (conditions.getLike().get(i) == LikeType.BOTH)
                         sql += conditions.getWhereData().getKey(i) + " like '%" + conditions.getWhereData().getValue(i) + "%' " + connector;
+                    else if (conditions.getCondition().get(i) == ConditionType.MAX)
+                        sql += conditions.getWhereData().getKey(i) + " > '" + conditions.getWhereData().getValue(i) + "' " + connector;
+                    else if (conditions.getCondition().get(i) == ConditionType.MIN)
+                        sql += conditions.getWhereData().getKey(i) + " < '" + conditions.getWhereData().getValue(i) + "' " + connector;
+                    else if (conditions.getCondition().get(i) == ConditionType.EQUAL)
+                        sql += conditions.getWhereData().getKey(i) + " == '" + conditions.getWhereData().getValue(i) + "' " + connector;
+                    else if (conditions.getCondition().get(i) == ConditionType.NOT_EQUAL)
+                        sql += conditions.getWhereData().getKey(i) + " <> '" + conditions.getWhereData().getValue(i) + "' " + connector;
+                    else if (conditions.getCondition().get(i) == ConditionType.MIN_EQUAL)
+                        sql += conditions.getWhereData().getKey(i) + " <= '" + conditions.getWhereData().getValue(i) + "' " + connector;
+                    else if (conditions.getCondition().get(i) == ConditionType.MAX_EQUAL)
+                        sql += conditions.getWhereData().getKey(i) + " >= '" + conditions.getWhereData().getValue(i) + "' " + connector;
+                    else if (conditions.getCondition().get(i) == ConditionType.IS)
+                        sql += conditions.getWhereData().getKey(i) + " IS '" + conditions.getWhereData().getValue(i) + "' " + connector;
+                    else if (conditions.getCondition().get(i) == ConditionType.IS_NOT)
+                        sql += conditions.getWhereData().getKey(i) + " IS NOT '" + conditions.getWhereData().getValue(i) + "' " + connector;
                     else {
                         sql += conditions.getWhereData().getKey(i) + "='" + conditions.getWhereData().getValue(i) + "' " + connector;
                     }
@@ -191,6 +208,22 @@ public class Selections<K> {
                         sql += conditions.getWhereData().getKey(i) + " like '" + conditions.getWhereData().getValue(i) + "%' " + connector;
                     else if (conditions.getLike().get(i) == LikeType.BOTH)
                         sql += conditions.getWhereData().getKey(i) + " like '%" + conditions.getWhereData().getValue(i) + "%' " + connector;
+                    else if (conditions.getCondition().get(i) == ConditionType.MAX)
+                        sql += conditions.getWhereData().getKey(i) + " > '" + conditions.getWhereData().getValue(i) + "' " + connector;
+                    else if (conditions.getCondition().get(i) == ConditionType.MIN)
+                        sql += conditions.getWhereData().getKey(i) + " < '" + conditions.getWhereData().getValue(i) + "' " + connector;
+                    else if (conditions.getCondition().get(i) == ConditionType.EQUAL)
+                        sql += conditions.getWhereData().getKey(i) + " == '" + conditions.getWhereData().getValue(i) + "' " + connector;
+                    else if (conditions.getCondition().get(i) == ConditionType.NOT_EQUAL)
+                        sql += conditions.getWhereData().getKey(i) + " <> '" + conditions.getWhereData().getValue(i) + "' " + connector;
+                    else if (conditions.getCondition().get(i) == ConditionType.MIN_EQUAL)
+                        sql += conditions.getWhereData().getKey(i) + " <= '" + conditions.getWhereData().getValue(i) + "' " + connector;
+                    else if (conditions.getCondition().get(i) == ConditionType.MAX_EQUAL)
+                        sql += conditions.getWhereData().getKey(i) + " >= '" + conditions.getWhereData().getValue(i) + "' " + connector;
+                    else if (conditions.getCondition().get(i) == ConditionType.IS)
+                        sql += conditions.getWhereData().getKey(i) + " IS '" + conditions.getWhereData().getValue(i) + "' " + connector;
+                    else if (conditions.getCondition().get(i) == ConditionType.IS_NOT)
+                        sql += conditions.getWhereData().getKey(i) + " IS NOT '" + conditions.getWhereData().getValue(i) + "' " + connector;
                     else {
                         sql += conditions.getWhereData().getKey(i) + "='" + conditions.getWhereData().getValue(i) + "' " + connector;
                     }

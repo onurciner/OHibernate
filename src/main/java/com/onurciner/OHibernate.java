@@ -1147,7 +1147,7 @@ public class OHibernate<K> {
         return this;
     }
 
-    public OHibernate Where(String key, Object value, ConditionType condition) {
+    public OHibernate where(String key, Object value, ConditionType condition) {
         this.conditions.getWhereData().add(key, value);
         this.conditions.getLike().add(null);
         this.conditions.getCondition().add(condition);

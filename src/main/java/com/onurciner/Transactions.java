@@ -23,4 +23,6 @@ public interface Transactions {
     public void delete() throws Exception;
 
     public void delete(String key, Object value) throws Exception;
+
+    public void deleteAll() throws Exception;
 }
