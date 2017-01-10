@@ -9,7 +9,7 @@ There is relational table support. OneToOne and OneToMany are fully supported.
 OHQL support for simple inquiries.
 
 #### Log
-v1.0.8 -> Solved single quotes problem.
+v1.0.8 -> Solved single quotes problem.<br>
 v1.0.9 -> Folder created automatically.
 
 ##Installation
