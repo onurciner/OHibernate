@@ -1,4 +1,5 @@
-# OHibernate
+# OHibernate 
+<img src="https://img.shields.io/badge/API-15%2B-orange.svg"> <br>
 1.0.8
 
 SQLite Connection for Android. ORM tool for Android devices.
