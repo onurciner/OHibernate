@@ -2,6 +2,8 @@ package com.onurciner;
 
 import android.util.Log;
 
+import java.io.File;
+
 import jsqlite.Database;
 import jsqlite.Exception;
 
@@ -25,6 +27,8 @@ public class OHibernateConfig {
         if (config == null) {
             config = new OHibernateConfig();
 
+            createDir();
+
             db = new Database();
             try {
                 db.open(DB_PATH + DB_NAME, jsqlite.Constants.SQLITE_OPEN_READWRITE);
@@ -47,4 +51,11 @@ public class OHibernateConfig {
         return db;
     }
 
+    private static File newdir;
+    private static void createDir() {
+        newdir = new File(DB_PATH);
+        if (!newdir.exists()) {
+            newdir.mkdirs();
+        }
+    }
 }
