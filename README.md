@@ -1,6 +1,6 @@
 # OHibernate 
 <img src="https://img.shields.io/badge/API-15%2B-orange.svg"> <br>
-1.0.8
+1.0.9
 
 SQLite Connection for Android. ORM tool for Android devices.
 First ORM with Geometric-Spatial data support for Android operating systems.
@@ -10,6 +10,7 @@ OHQL support for simple inquiries.
 
 #### Log
 v1.0.8 -> Solved single quotes problem.
+v1.0.9 -> Folder created automatically.
 
 ##Installation
 
@@ -24,20 +25,28 @@ To use the library, first include it your project using Gradle
 and:
 
         dependencies {
-                compile 'com.github.10uroi:OHibernate:1.0.8'
+                compile 'com.github.10uroi:OHibernate:1.0.9'
         }
 ##How to use
 
 ###Attached into the "MainActivity" class
 		public class MainActivity extends AppCompatActivity {
 		
+		    //I set the database path and the name
+		    public static final String DATABASE_EXTERNAL = Environment.getExternalStorageDirectory().getPath(); //external
+		    public static final String DATABASE_SUB = "/folderName/";
+		    public static final String DATABASE_DB_PATH = DATABASE_EXTERNAL + DATABASE_SUB;
+		    public static final String DATABASE_DATA_NAME = "databaseName.sqlite";
+		
+		
+		
 		    @Override
 			protected void onCreate(Bundle savedInstanceState) {
 
 			super.onCreate(savedInstanceState);
 
-			OHibernateConfig.DB_PATH = dbPath; // DATABASE PATH
-			OHibernateConfig.DB_NAME = dbName; // DATABASE NAME
+			OHibernateConfig.DB_PATH = DATABASE_DB_PATH; // DATABASE PATH
+			OHibernateConfig.DB_NAME = DATABASE_DATA_NAME; // DATABASE NAME
 			
 			}
 		}
