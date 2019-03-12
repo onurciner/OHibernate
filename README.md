@@ -30,6 +30,7 @@ and:
 ##How to use
 
 ###Attached into the "MainActivity" class
+
 		public class MainActivity extends AppCompatActivity {
 		
 		    //I set the database path and the name
@@ -52,6 +53,7 @@ and:
 		}
 
 ###We are creating the "ExampleBean" class
+
         @Entity(TABLE_NAME = "example", TABLE_OPERATION = Entity.TABLE_OPERATION_TYPE.DROP_AND_CREATE)
 		public class ExampleBean {
 
@@ -73,7 +75,8 @@ and:
 			//GETTER - SETTER
 		}
 		
-###We are creating the "ExampleBeanDAO" class		
+###We are creating the "ExampleBeanDAO" class	
+
 		public class ExampleBeanDAO {
 
 			//Automatic Transactions
